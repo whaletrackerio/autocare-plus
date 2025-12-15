@@ -23,6 +23,7 @@
     }
 
     * { box-sizing:border-box; margin:0; padding:0 }
+
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
       background: linear-gradient(180deg, #050816, #020617);
@@ -94,6 +95,11 @@
       font-weight:700;
       cursor:pointer;
       font-size:1rem;
+    }
+
+    button.secondary {
+      background:#1f2937;
+      color:var(--text);
     }
 
     button:active {
@@ -168,17 +174,25 @@
     <div class="small">Historique sauvegardé localement</div>
   </div>
 
-  <!-- Pro -->
+  <!-- PRO -->
   <div class="card">
     <h2>⭐ AutoCare+ Pro</h2>
+
     <p style="color:var(--muted); font-size:0.9rem; margin-bottom:12px;">
-      Garage illimité · Export PDF · Sauvegarde & restauration
+      ✔ Garage illimité<br>
+      ✔ Export PDF<br>
+      ✔ Sauvegarde & restauration<br>
+      ✔ Accès à vie
     </p>
 
-    <!-- ✅ REDIRECTION PAYPAL -->
-    <button onclick="window.location.href='https://www.paypal.com/invoice/p/#HW6MKB6ZDD366X4M'">
-      Passer en Pro
+    <!-- PAIEMENT PAYPAL AUTOMATIQUE -->
+    <button onclick="window.open('https://paypal.me/autocareplus811/12', '_blank')">
+      Passer en Pro — 12 €
     </button>
+
+    <div class="small">
+      Paiement sécurisé via PayPal
+    </div>
   </div>
 
 </main>
