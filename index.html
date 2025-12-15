@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#050816">
+<title>AutoCare+ — Entretien intelligent</title>
+
+<style>
+:root{
+  --bg:#050816;
+  --card:#0f172a;
+  --border:#1f2937;
+  --text:#e5e7eb;
+  --muted:#9ca3af;
+  --accent:#22c55e;
+  --warn:#f59e0b;
+  --bad:#ef4444;
+  --radius:18px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  background:linear-gradient(180deg,#020617,var(--bg));
+  color:var(--text);
+}
+header{
+  position:sticky;top:0;z-index:10;
+  background:rgba(2,6,23,.85);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--border);
+  padding:14px;
+}
+header h1{font-size:22px;font-weight:900}
+header p{font-size:12px;color:var(--muted)}
+.wrap{max-width:520px;margin:0 auto;padding:16px}
+.card{
+  background:rgba(15,23,42,.9);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:16px;
+  margin-bottom:16px;
+}
+label{font-size:12px;color:var(--muted);display:block;margin-top:12px}
+input,select{
+  width:100%;margin-top:6px;padding:12px;
+  border-radius:12px;border:1px solid var(--border);
+  background:#020617;color:var(--text);
+}
+button{
+  width:100%;margin-top:16px;padding:14px;
+  border-radius:999px;border:none;
+  background:linear-gradient(120deg,#22c55e,#16a34a);
+  color:#022c22;font-weight:900;cursor:pointer;
+}
+button.secondary{
+  background:rgba(148,163,184,.12);
+  color:var(--text);
+  border:1px solid rgba(148,163,184,.25);
+}
+.result{
+  margin-top:12px;
+  padding:12px;
+  border-radius:14px;
+  background:#020617;
+  border:1px solid var(--border);
+}
+.bad{color:var(--bad)}
+.warn{color:var(--warn)}
+.good{color:var(--accent)}
+.history-item{
+  border-bottom:1px solid var(--border);
+  padding:10px 0;
+  font-size:12px;
+}
+footer{
+  text-align:center;
+  font-size:11px;
+  color:var(--muted);
+  margin:24px 0;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>AutoCare+</h1>
+  <p>Entretien intelligent — voiture & moto</p>
+</header>
+
+<div class="wrap">
+
+  <div class="card">
+    <label>Type de véhicule</label>
+    <select id="vehicle">
+      <option value="car">Voiture</option>
+      <option value="bike">Moto</option>
+    </select>
+
+    <label>Type d’usage</label>
+    <select id="usage">
+      <option value="city">Ville</option>
+      <option value="mixed">Mixte</option>
+      <option value="road">Route</option>
+    </select>
+
+    <label>Kilométrage actuel</label>
+    <input id="kmNow" type="number" placeholder="ex: 72500">
+
+    <label>Dernière vidange (km)</label>
+    <input id="kmOil" type="number" placeholder="ex: 65000">
+
+    <label>Dernier contrôle freins (km)</label>
+    <input id="kmBrakes" type="number" placeholder="ex: 60000">
+
+    <label>Dernier contrôle pneus (km)</label>
+    <input id="kmTires" type="number" placeholder="ex: 58000">
+
+    <button onclick="calculate()">Calculer l’entretien</button>
+    <button class="secondary" onclick="saveHistory()">Ajouter à l’historique</button>
+
+    <div id="output"></div>
+  </div>
+
+  <div class="card">
+    <b>Historique</b>
+    <div id="history"></div>
+  </div>
+
+  <footer>
+    © 2025 AutoCare+ — Première publication publique : Décembre 2025<br>
+    Données indicatives • Aucun compte requis
+  </footer>
+
+</div>
+
+<script>
+function factorUsage(u){
+  if(u==="city") return 0.8;
+  if(u==="road") return 1.2;
+  return 1;
+}
+
+function base(vehicle){
+  if(vehicle==="bike"){
+    return {oil:6000, brakes:8000, tires:7000};
+  }
+  return {oil:10000, brakes:12000, tires:10000};
+}
+
+function calculate(){
+  const v = vehicle.value;
+  const u = usage.value;
+  const km = Number(kmNow.value);
+  const oil = Number(kmOil.value);
+  const br = Number(kmBrakes.value);
+  const ti = Number(kmTires.value);
+
+  if(!km){ alert("Kilométrage actuel requis"); return; }
+
+  const f = factorUsage(u);
+  const b = base(v);
+
+  const oilNext = (oil||km) + Math.round(b.oil*f);
+  const brNext  = (br||km)  + Math.round(b.brakes*f);
+  const tiNext  = (ti||km)  + Math.round(b.tires*f);
+
+  output.innerHTML = `
+    <div class="result">
+      <div>🛢️ Vidange : <b>${oilNext.toLocaleString()} km</b></div>
+      <div>🛑 Freins : <b>${brNext.toLocaleString()} km</b></div>
+      <div>🛞 Pneus : <b>${tiNext.toLocaleString()} km</b></div>
+    </div>
+  `;
+}
+
+function saveHistory(){
+  if(!output.innerHTML){ alert("Fais un calcul avant"); return; }
+  const h = JSON.parse(localStorage.getItem("autocare_history")||"[]");
+  h.unshift({
+    date:new Date().toLocaleString(),
+    text:output.innerHTML
+  });
+  localStorage.setItem("autocare_history", JSON.stringify(h.slice(0,20)));
+  renderHistory();
+}
+
+function renderHistory(){
+  const h = JSON.parse(localStorage.getItem("autocare_history")||"[]");
+  history.innerHTML = h.length ? h.map(e=>`
+    <div class="history-item">
+      <b>${e.date}</b><br>${e.text}
+    </div>
+  `).join("") : "<p style='color:#9ca3af;font-size:12px'>Aucun historique</p>";
+}
+renderHistory();
+</script>
+
+</body>
+</html>
