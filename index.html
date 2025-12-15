@@ -12,7 +12,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
   <style>
-    :root {
+    :root{
       --bg:#050816;
       --card:#0f172a;
       --text:#e5e7eb;
@@ -20,227 +20,668 @@
       --accent:#22c55e;
       --border:#1f2937;
       --radius:16px;
+      --bad:#ef4444;
+      --warn:#f59e0b;
     }
-
-    * { box-sizing:border-box; margin:0; padding:0 }
-
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      background: linear-gradient(180deg, #050816, #020617);
-      color: var(--text);
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
+      background:linear-gradient(180deg,#050816,#020617);
+      color:var(--text);
       min-height:100vh;
     }
-
-    header {
-      padding:20px;
+    header{
+      padding:18px 16px;
       text-align:center;
       border-bottom:1px solid var(--border);
+      position:sticky; top:0;
+      background:rgba(5,8,22,.92);
+      backdrop-filter: blur(10px);
+      z-index:10;
     }
+    header h1{font-size:1.55rem;color:var(--accent);letter-spacing:.2px}
+    header p{margin-top:6px;color:var(--muted);font-size:.9rem}
 
-    header h1 {
-      font-size:1.6rem;
-      color: var(--accent);
-    }
-
-    header p {
-      margin-top:6px;
-      color: var(--muted);
-      font-size:0.9rem;
-    }
-
-    main {
-      padding:20px;
-      max-width:900px;
+    main{
+      padding:18px 14px;
+      max-width:980px;
       margin:auto;
       display:grid;
-      gap:20px;
+      gap:16px;
     }
 
-    .card {
-      background: var(--card);
+    .row{display:grid; gap:16px}
+    @media(min-width:900px){ .row{grid-template-columns:1fr 1fr} }
+
+    .card{
+      background:rgba(15,23,42,.92);
       border:1px solid var(--border);
-      border-radius: var(--radius);
-      padding:20px;
+      border-radius:var(--radius);
+      padding:16px;
     }
-
-    .card h2 {
-      font-size:1.2rem;
-      margin-bottom:12px;
-    }
-
-    label {
-      display:block;
-      font-size:0.85rem;
-      color: var(--muted);
-      margin-bottom:6px;
-    }
-
-    input, select {
+    .card h2{font-size:1.1rem;margin-bottom:10px}
+    .muted{color:var(--muted);font-size:.9rem}
+    label{display:block;font-size:.85rem;color:var(--muted);margin:10px 0 6px}
+    input,select,textarea{
       width:100%;
       padding:12px;
-      border-radius:10px;
+      border-radius:12px;
       border:1px solid var(--border);
       background:#020617;
       color:var(--text);
-      margin-bottom:12px;
+      outline:none;
     }
-
-    button {
+    textarea{min-height:90px;resize:vertical}
+    .btn{
       width:100%;
       padding:14px;
       border:none;
       border-radius:12px;
       background:var(--accent);
       color:#052e16;
-      font-weight:700;
+      font-weight:800;
       cursor:pointer;
       font-size:1rem;
     }
-
-    button.secondary {
-      background:#1f2937;
+    .btn:active{transform:scale(.99)}
+    .btn.secondary{
+      background:transparent;
+      border:1px solid var(--border);
       color:var(--text);
+      font-weight:700;
     }
-
-    button:active {
-      transform: scale(0.98);
+    .btn.danger{
+      background:transparent;
+      border:1px solid rgba(239,68,68,.55);
+      color:#fecaca;
+      font-weight:700;
     }
-
-    .small {
-      font-size:0.8rem;
-      color:var(--muted);
-      text-align:center;
-      margin-top:10px;
-    }
-
-    footer {
-      text-align:center;
-      padding:20px;
-      color:var(--muted);
-      font-size:0.75rem;
-    }
-
-    /* Badge PRO */
-    .pro-badge {
-      background: var(--accent);
-      color:#052e16;
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
       padding:6px 10px;
       border-radius:999px;
-      font-size:0.75rem;
-      font-weight:700;
-      display:inline-block;
-      margin-left:8px;
+      border:1px solid var(--border);
+      color:var(--muted);
+      font-size:.85rem;
     }
+    .pill.on{border-color:rgba(34,197,94,.45); color:#bbf7d0}
+    .pill.off{border-color:rgba(245,158,11,.45); color:#fde68a}
+    .small{font-size:.8rem;color:var(--muted);text-align:center;margin-top:10px}
+    footer{text-align:center;padding:18px;color:var(--muted);font-size:.75rem}
+
+    .list{display:grid; gap:10px; margin-top:10px}
+    .item{
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:12px;
+      background:rgba(2,6,23,.55);
+    }
+    .itemTop{display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap}
+    .item strong{font-size:.95rem}
+    .tag{font-size:.78rem;color:var(--muted)}
+    .actions{display:flex; gap:10px; margin-top:10px; flex-wrap:wrap}
+    .actions .btn{width:auto; padding:10px 12px; font-size:.95rem}
+
+    /* Modal */
+    .modal{
+      position:fixed; inset:0;
+      background:rgba(0,0,0,.6);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:16px;
+      z-index:50;
+    }
+    .modal.open{display:flex}
+    .modalBox{
+      width:min(560px,100%);
+      background:rgba(15,23,42,.98);
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:16px;
+    }
+    .modalBox h3{margin-bottom:8px}
+    .note{
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid rgba(245,158,11,.35);
+      background:rgba(245,158,11,.08);
+      color:#fde68a;
+      font-size:.9rem;
+      margin-top:10px;
+    }
+    .ok{
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid rgba(34,197,94,.35);
+      background:rgba(34,197,94,.08);
+      color:#bbf7d0;
+      font-size:.9rem;
+      margin-top:10px;
+      display:none;
+    }
+    .ok.show{display:block}
+    .err{
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid rgba(239,68,68,.35);
+      background:rgba(239,68,68,.08);
+      color:#fecaca;
+      font-size:.9rem;
+      margin-top:10px;
+      display:none;
+    }
+    .err.show{display:block}
   </style>
 </head>
 
 <body>
-
 <header>
-  <h1>AutoCare+
-    <span id="proBadge" style="display:none" class="pro-badge">PRO</span>
-  </h1>
+  <h1>AutoCare+</h1>
   <p>Suivi intelligent d’entretien — voiture & moto</p>
 </header>
 
 <main>
 
-  <!-- Véhicule -->
+  <!-- Statut Pro -->
   <div class="card">
-    <h2>🚗 Véhicule</h2>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+      <div>
+        <h2>⭐ AutoCare+ Pro</h2>
+        <div class="muted">Garage illimité · Export PDF · Sauvegarde & restauration</div>
+      </div>
+      <div id="proPill" class="pill off">🔒 Pro: OFF</div>
+    </div>
 
-    <label>Type</label>
-    <select>
-      <option>Voiture</option>
-      <option>Moto</option>
-    </select>
-
-    <label>Marque</label>
-    <input type="text" placeholder="Ex : Toyota, Yamaha">
-
-    <label>Modèle</label>
-    <input type="text" placeholder="Ex : Corolla, MT-07">
-
-    <label>Kilométrage actuel</label>
-    <input type="number" placeholder="Ex : 125000">
-  </div>
-
-  <!-- Entretien -->
-  <div class="card">
-    <h2>🛠️ Ajouter un entretien</h2>
-
-    <label>Type d’entretien</label>
-    <select>
-      <option>Vidange</option>
-      <option>Freins</option>
-      <option>Filtres</option>
-      <option>Pneus</option>
-      <option>Autre</option>
-    </select>
-
-    <label>Date</label>
-    <input type="date">
-
-    <label>Kilométrage</label>
-    <input type="number">
-
-    <button>Enregistrer</button>
-    <div class="small">Historique sauvegardé localement</div>
-  </div>
-
-  <!-- PRO -->
-  <div class="card">
-    <h2>⭐ AutoCare+ Pro</h2>
-
-    <p style="color:var(--muted); font-size:0.9rem; margin-bottom:12px;">
-      ✔ Garage illimité<br>
-      ✔ Export PDF<br>
-      ✔ Sauvegarde & restauration
-    </p>
-
-    <!-- PAIEMENT -->
-    <button onclick="window.open('https://paypal.me/autocareplus811/12', '_blank')">
-      Passer en Pro — 12 €
-    </button>
-
-    <!-- ACTIVATION -->
-    <button class="secondary" onclick="activatePro()" style="margin-top:10px;">
-      Activer Pro (code)
-    </button>
+    <div class="actions" style="margin-top:12px">
+      <button class="btn" id="buyProBtn">Passer en Pro (12€)</button>
+      <button class="btn secondary" id="activateProBtn">Activer Pro</button>
+      <button class="btn danger" id="resetProBtn" title="Désactive le Pro sur cet appareil">Désactiver</button>
+    </div>
 
     <div class="small">
-      Paiement sécurisé via PayPal · Activation instantanée
+      Paiement via PayPal.Me → tu reçois un email automatique avec le code → tu colles le code ici.
     </div>
+  </div>
+
+  <div class="row">
+
+    <!-- Véhicules -->
+    <div class="card">
+      <h2>🚗 Véhicules</h2>
+      <div class="muted">Version gratuite : 1 véhicule. Pro : illimité.</div>
+
+      <label>Type</label>
+      <select id="vehType">
+        <option>Voiture</option>
+        <option>Moto</option>
+      </select>
+
+      <label>Marque</label>
+      <input id="vehBrand" type="text" placeholder="Ex : Toyota, Yamaha">
+
+      <label>Modèle</label>
+      <input id="vehModel" type="text" placeholder="Ex : Corolla, MT-07">
+
+      <label>Kilométrage actuel</label>
+      <input id="vehKm" type="number" placeholder="Ex : 125000">
+
+      <button class="btn" id="saveVehicleBtn" style="margin-top:10px;">Enregistrer ce véhicule</button>
+
+      <div class="list" id="vehicleList"></div>
+    </div>
+
+    <!-- Entretien -->
+    <div class="card">
+      <h2>🛠️ Ajouter un entretien</h2>
+
+      <label>Véhicule</label>
+      <select id="vehSelect"></select>
+
+      <label>Type d’entretien</label>
+      <select id="maintType">
+        <option>Vidange</option>
+        <option>Freins</option>
+        <option>Filtres</option>
+        <option>Pneus</option>
+        <option>Batterie</option>
+        <option>Chaîne / kit</option>
+        <option>Autre</option>
+      </select>
+
+      <label>Date</label>
+      <input id="maintDate" type="date">
+
+      <label>Kilométrage</label>
+      <input id="maintKm" type="number" placeholder="Ex : 132000">
+
+      <label>Note (optionnel)</label>
+      <textarea id="maintNote" placeholder="Ex : huile 5W30, filtre remplacé, etc."></textarea>
+
+      <button class="btn" id="saveMaintBtn" style="margin-top:10px;">Enregistrer</button>
+      <div class="small">Historique sauvegardé localement</div>
+    </div>
+
+  </div>
+
+  <!-- Historique -->
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+      <h2>📜 Historique</h2>
+      <div class="actions" style="margin:0;">
+        <button class="btn secondary" id="exportPdfBtn">Export PDF (Pro)</button>
+        <button class="btn secondary" id="backupBtn">Sauvegarder (Pro)</button>
+        <button class="btn secondary" id="restoreBtn">Restaurer (Pro)</button>
+      </div>
+    </div>
+
+    <div class="list" id="maintList"></div>
   </div>
 
 </main>
 
-<footer>
-  AutoCare+ © 2025 — Nouvelle-Calédonie
-</footer>
+<footer>AutoCare+ © 2025 — Nouvelle-Calédonie</footer>
+
+<!-- Modal Activer Pro -->
+<div class="modal" id="proModal">
+  <div class="modalBox">
+    <h3>Activer AutoCare+ Pro</h3>
+    <div class="muted">Colle ici le code reçu par email après paiement.</div>
+
+    <label style="margin-top:10px">Code d’activation</label>
+    <input id="proCodeInput" type="text" placeholder="Ex : AUTOPRO-2025">
+
+    <div class="note">Si tu n’as pas encore payé : clique “Passer en Pro”, paie 12€, puis reviens ici.</div>
+    <div class="ok" id="proOk">✅ Pro activé sur cet appareil.</div>
+    <div class="err" id="proErr">❌ Code incorrect.</div>
+
+    <div class="actions" style="margin-top:12px;justify-content:flex-end;">
+      <button class="btn secondary" id="closeModalBtn">Fermer</button>
+      <button class="btn" id="confirmProBtn">Activer</button>
+    </div>
+  </div>
+</div>
 
 <script>
-  const PRO_CODE = "AUTOCARE-PRO-2025";
+  /**************
+   * CONFIG
+   **************/
+  const PAYPAL_ME = "https://www.paypal.com/paypalme/autocareplus811/12"; // 12€ (PayPal choisira la devise si besoin)
+  const PRO_CODE  = "AUTOPRO-2025"; // <-- change ça pour le code que tu mets dans ton email auto
 
-  function activatePro() {
-    const code = prompt("Entrez votre code Pro :");
+  /**************
+   * STORAGE
+   **************/
+  const LS_KEY = "autocare_data_v1";
+  const LS_PRO = "autocare_pro_v1";
 
-    if (code === PRO_CODE) {
-      localStorage.setItem("autocare_pro", "true");
-      alert("🎉 AutoCare+ Pro activé !");
-      updateProUI();
-    } else {
-      alert("❌ Code invalide");
+  function loadData(){
+    try{
+      return JSON.parse(localStorage.getItem(LS_KEY)) || { vehicles:[], maint:[] };
+    }catch(e){
+      return { vehicles:[], maint:[] };
+    }
+  }
+  function saveData(data){ localStorage.setItem(LS_KEY, JSON.stringify(data)); }
+
+  function isPro(){ return localStorage.getItem(LS_PRO) === "1"; }
+  function setPro(v){ localStorage.setItem(LS_PRO, v ? "1" : "0"); refreshProUI(); renderAll(); }
+
+  /**************
+   * UI HELPERS
+   **************/
+  const $ = (id)=>document.getElementById(id);
+
+  function refreshProUI(){
+    const pill = $("proPill");
+    if(isPro()){
+      pill.classList.remove("off");
+      pill.classList.add("on");
+      pill.textContent = "✅ Pro: ON";
+    }else{
+      pill.classList.remove("on");
+      pill.classList.add("off");
+      pill.textContent = "🔒 Pro: OFF";
     }
   }
 
-  function updateProUI() {
-    if (localStorage.getItem("autocare_pro") === "true") {
-      document.getElementById("proBadge").style.display = "inline-block";
+  function showModal(open){
+    $("proModal").classList.toggle("open", !!open);
+    if(open){
+      $("proCodeInput").value = "";
+      $("proOk").classList.remove("show");
+      $("proErr").classList.remove("show");
+      setTimeout(()=>$("proCodeInput").focus(), 50);
     }
   }
 
-  updateProUI();
+  function escapeHtml(str){
+    return String(str||"")
+      .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;").replaceAll("'","&#039;");
+  }
+
+  /**************
+   * RENDER
+   **************/
+  function renderVehicles(){
+    const data = loadData();
+    const list = $("vehicleList");
+    list.innerHTML = "";
+
+    const isProUser = isPro();
+
+    data.vehicles.forEach((v, idx)=>{
+      const div = document.createElement("div");
+      div.className = "item";
+      div.innerHTML = `
+        <div class="itemTop">
+          <div>
+            <strong>${escapeHtml(v.type)} — ${escapeHtml(v.brand)} ${escapeHtml(v.model)}</strong>
+            <div class="tag">KM actuel: ${escapeHtml(v.km)}</div>
+          </div>
+          <button class="btn danger" style="width:auto;padding:8px 10px;font-size:.9rem" data-del="${idx}">Supprimer</button>
+        </div>
+      `;
+      list.appendChild(div);
+    });
+
+    // suppression
+    list.querySelectorAll("[data-del]").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const i = Number(btn.getAttribute("data-del"));
+        const d = loadData();
+        const vehId = d.vehicles[i]?.id;
+        d.vehicles.splice(i,1);
+        // supprime aussi les entretiens liés
+        d.maint = d.maint.filter(m=>m.vehId !== vehId);
+        saveData(d);
+        renderAll();
+      });
+    });
+
+    // select véhicules
+    const sel = $("vehSelect");
+    sel.innerHTML = "";
+    if(data.vehicles.length === 0){
+      const op = document.createElement("option");
+      op.value = "";
+      op.textContent = "Ajoute un véhicule d’abord";
+      sel.appendChild(op);
+      sel.disabled = true;
+    }else{
+      sel.disabled = false;
+      data.vehicles.forEach(v=>{
+        const op = document.createElement("option");
+        op.value = v.id;
+        op.textContent = `${v.type} — ${v.brand} ${v.model}`;
+        sel.appendChild(op);
+      });
+    }
+
+    // limite gratuite
+    if(!isProUser && data.vehicles.length > 1){
+      // sécurité (au cas où)
+      data.vehicles = data.vehicles.slice(0,1);
+      data.maint = data.maint.filter(m=>m.vehId === data.vehicles[0]?.id);
+      saveData(data);
+      renderAll();
+    }
+  }
+
+  function renderMaint(){
+    const data = loadData();
+    const list = $("maintList");
+    list.innerHTML = "";
+
+    if(data.maint.length === 0){
+      list.innerHTML = `<div class="muted">Aucun entretien enregistré pour l’instant.</div>`;
+      return;
+    }
+
+    // tri date desc
+    const sorted = [...data.maint].sort((a,b)=>{
+      const da = a.date ? new Date(a.date).getTime() : 0;
+      const db = b.date ? new Date(b.date).getTime() : 0;
+      return db - da;
+    });
+
+    sorted.forEach((m)=>{
+      const veh = data.vehicles.find(v=>v.id===m.vehId);
+      const div = document.createElement("div");
+      div.className = "item";
+      div.innerHTML = `
+        <div class="itemTop">
+          <div>
+            <strong>${escapeHtml(m.type)} — ${escapeHtml(m.km)} km</strong>
+            <div class="tag">${escapeHtml(m.date || "")} · ${veh ? escapeHtml(veh.brand+" "+veh.model) : "Véhicule supprimé"}</div>
+            ${m.note ? `<div class="muted" style="margin-top:6px">${escapeHtml(m.note)}</div>` : ""}
+          </div>
+          <button class="btn danger" style="width:auto;padding:8px 10px;font-size:.9rem" data-delmaint="${m.id}">Supprimer</button>
+        </div>
+      `;
+      list.appendChild(div);
+    });
+
+    list.querySelectorAll("[data-delmaint]").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const id = btn.getAttribute("data-delmaint");
+        const d = loadData();
+        d.maint = d.maint.filter(x=>x.id !== id);
+        saveData(d);
+        renderAll();
+      });
+    });
+  }
+
+  function renderAll(){
+    renderVehicles();
+    renderMaint();
+    refreshProUI();
+  }
+
+  /**************
+   * ACTIONS
+   **************/
+  $("saveVehicleBtn").addEventListener("click", ()=>{
+    const data = loadData();
+
+    const pro = isPro();
+    if(!pro && data.vehicles.length >= 1){
+      alert("Version gratuite : 1 véhicule max. Passe en Pro pour garage illimité.");
+      return;
+    }
+
+    const type = $("vehType").value.trim();
+    const brand = $("vehBrand").value.trim();
+    const model = $("vehModel").value.trim();
+    const km = $("vehKm").value.trim();
+
+    if(!brand || !model){
+      alert("Marque + modèle requis.");
+      return;
+    }
+
+    data.vehicles.push({
+      id: crypto.randomUUID(),
+      type, brand, model,
+      km: km ? Number(km) : ""
+    });
+
+    saveData(data);
+
+    $("vehBrand").value = "";
+    $("vehModel").value = "";
+    $("vehKm").value = "";
+
+    renderAll();
+  });
+
+  $("saveMaintBtn").addEventListener("click", ()=>{
+    const data = loadData();
+    const vehId = $("vehSelect").value;
+    if(!vehId){
+      alert("Ajoute un véhicule d’abord.");
+      return;
+    }
+
+    const type = $("maintType").value;
+    const date = $("maintDate").value;
+    const km = $("maintKm").value.trim();
+    const note = $("maintNote").value.trim();
+
+    if(!km){
+      alert("Kilométrage requis.");
+      return;
+    }
+
+    data.maint.push({
+      id: crypto.randomUUID(),
+      vehId,
+      type,
+      date,
+      km: Number(km),
+      note
+    });
+
+    saveData(data);
+
+    $("maintKm").value = "";
+    $("maintNote").value = "";
+
+    renderAll();
+  });
+
+  // PayPal
+  $("buyProBtn").addEventListener("click", ()=>{
+    window.open(PAYPAL_ME, "_blank", "noopener,noreferrer");
+    showModal(true);
+  });
+
+  // Activer Pro
+  $("activateProBtn").addEventListener("click", ()=> showModal(true));
+  $("closeModalBtn").addEventListener("click", ()=> showModal(false));
+  $("proModal").addEventListener("click", (e)=>{
+    if(e.target === $("proModal")) showModal(false);
+  });
+
+  $("confirmProBtn").addEventListener("click", ()=>{
+    const code = $("proCodeInput").value.trim();
+    $("proOk").classList.remove("show");
+    $("proErr").classList.remove("show");
+
+    if(code && code.toUpperCase() === PRO_CODE.toUpperCase()){
+      setPro(true);
+      $("proOk").classList.add("show");
+      setTimeout(()=>showModal(false), 650);
+    }else{
+      $("proErr").classList.add("show");
+    }
+  });
+
+  // Désactiver Pro
+  $("resetProBtn").addEventListener("click", ()=>{
+    if(confirm("Désactiver le Pro sur cet appareil ?")){
+      setPro(false);
+    }
+  });
+
+  // Export PDF (simple via print)
+  $("exportPdfBtn").addEventListener("click", ()=>{
+    if(!isPro()){
+      alert("Fonction Pro. Active Pro pour exporter en PDF.");
+      return;
+    }
+    // Print-friendly
+    const data = loadData();
+    const lines = [];
+    lines.push("AutoCare+ — Export");
+    lines.push("");
+    lines.push("Véhicules:");
+    data.vehicles.forEach(v=>{
+      lines.push(`- ${v.type} — ${v.brand} ${v.model} (KM: ${v.km})`);
+    });
+    lines.push("");
+    lines.push("Entretiens:");
+    data.maint.forEach(m=>{
+      const v = data.vehicles.find(x=>x.id===m.vehId);
+      lines.push(`- ${m.date || ""} | ${m.type} | ${m.km} km | ${v ? (v.brand+" "+v.model) : ""} ${m.note ? ("| "+m.note) : ""}`);
+    });
+
+    const w = window.open("", "_blank");
+    w.document.write(`
+      <html><head><meta charset="utf-8"><title>AutoCare+ Export</title>
+      <style>body{font-family:system-ui;padding:18px} pre{white-space:pre-wrap}</style></head>
+      <body>
+        <h1>AutoCare+ — Export</h1>
+        <pre>${escapeHtml(lines.join("\n"))}</pre>
+        <p>Astuce: Ctrl+P → Enregistrer en PDF</p>
+      </body></html>
+    `);
+    w.document.close();
+    w.focus();
+  });
+
+  // Backup / Restore
+  $("backupBtn").addEventListener("click", ()=>{
+    if(!isPro()){
+      alert("Fonction Pro. Active Pro pour sauvegarder/restaurer.");
+      return;
+    }
+    const data = loadData();
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "autocare_backup.json";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  });
+
+  $("restoreBtn").addEventListener("click", ()=>{
+    if(!isPro()){
+      alert("Fonction Pro. Active Pro pour sauvegarder/restaurer.");
+      return;
+    }
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "application/json";
+    input.onchange = ()=>{
+      const file = input.files?.[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = ()=>{
+        try{
+          const data = JSON.parse(String(reader.result||""));
+          if(!data || !Array.isArray(data.vehicles) || !Array.isArray(data.maint)){
+            alert("Fichier invalide.");
+            return;
+          }
+          saveData(data);
+          renderAll();
+          alert("✅ Restauration terminée.");
+        }catch(e){
+          alert("Fichier invalide.");
+        }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  });
+
+  /**************
+   * INIT
+   **************/
+  renderAll();
+
+  // Service Worker
+  if("serviceWorker" in navigator){
+    window.addEventListener("load", ()=>{
+      navigator.serviceWorker.register("./sw.js").catch(()=>{});
+    });
+  }
 </script>
 
 </body>
