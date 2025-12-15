@@ -20,7 +20,6 @@
   --radius:18px;
   --shadow:0 18px 45px rgba(0,0,0,.55);
 }
-
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
 
@@ -34,77 +33,38 @@ body{
   overflow-x:hidden;
 }
 
-/* ✅ Décor latéral */
+/* ✅ Ambiance latérale premium (sans dessins) */
 body::before,
 body::after{
   content:"";
   position:fixed;
   top:0;
   bottom:0;
-  width:320px;
-  opacity:.18;
+  width:420px;
   pointer-events:none;
   z-index:0;
-  filter: blur(.2px);
+  filter: blur(120px);
+  opacity:.35;
 }
-
-/* Voiture à gauche */
+/* Lueur verte (voiture) */
 body::before{
-  left:0;
-  background:
-    url("data:image/svg+xml;utf8,\
-<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 600'>\
-<defs>\
-  <linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>\
-    <stop offset='0' stop-color='%2322c55e'/>\
-    <stop offset='1' stop-color='%2316a34a'/>\
-  </linearGradient>\
-</defs>\
-<path fill='url(%23g)' d='M120 355h360l-28 86H148z' opacity='.9'/>\
-<path fill='url(%23g)' d='M185 250h230l60 105H125z' opacity='.85'/>\
-<path fill='%23ffffff' d='M230 270h140l24 44H206z' opacity='.12'/>\
-<circle cx='210' cy='440' r='36' fill='url(%23g)'/>\
-<circle cx='390' cy='440' r='36' fill='url(%23g)'/>\
-<circle cx='210' cy='440' r='16' fill='%23020617' opacity='.7'/>\
-<circle cx='390' cy='440' r='16' fill='%23020617' opacity='.7'/>\
-</svg>")
-    center no-repeat;
-  background-size:270px;
+  left:-120px;
+  background:radial-gradient(circle at 30% 50%, rgba(34,197,94,.45), transparent 60%);
 }
-
-/* Moto à droite */
+/* Lueur violette (moto) */
 body::after{
-  right:0;
-  background:
-    url("data:image/svg+xml;utf8,\
-<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 600'>\
-<defs>\
-  <linearGradient id='m' x1='0' y1='0' x2='1' y2='1'>\
-    <stop offset='0' stop-color='%23a855f7'/>\
-    <stop offset='1' stop-color='%23ec4899'/>\
-  </linearGradient>\
-</defs>\
-<circle cx='200' cy='390' r='74' fill='url(%23m)' opacity='.92'/>\
-<circle cx='420' cy='390' r='74' fill='url(%23m)' opacity='.92'/>\
-<circle cx='200' cy='390' r='34' fill='%23020617' opacity='.7'/>\
-<circle cx='420' cy='390' r='34' fill='%23020617' opacity='.7'/>\
-<path fill='url(%23m)' d='M200 390 L295 290 L420 390 Z' opacity='.9'/>\
-<rect x='282' y='250' width='46' height='95' rx='10' fill='url(%23m)' opacity='.9'/>\
-<path fill='%23ffffff' d='M320 260h60l-14 18h-46z' opacity='.10'/>\
-</svg>")
-    center no-repeat;
-  background-size:270px;
+  right:-120px;
+  background:radial-gradient(circle at 70% 50%, rgba(168,85,247,.45), transparent 60%);
 }
-
-/* Cache sur mobile */
+/* Mobile : plus discret */
 @media(max-width:900px){
-  body::before, body::after{display:none;}
+  body::before, body::after{opacity:.18;}
 }
 
 /* Header sticky */
 header{
   position:sticky;top:0;z-index:10;
-  background:rgba(2,6,23,.80);
+  background:rgba(2,6,23,.82);
   backdrop-filter:blur(12px);
   border-bottom:1px solid rgba(31,41,55,.85);
   padding:14px 14px 12px;
@@ -134,9 +94,13 @@ header p{
 
 label{font-size:12px;color:var(--muted);display:block;margin-top:12px}
 input,select{
-  width:100%;margin-top:6px;padding:12px;
-  border-radius:12px;border:1px solid rgba(31,41,55,.95);
-  background:#020617;color:var(--text);
+  width:100%;
+  margin-top:6px;
+  padding:12px;
+  border-radius:12px;
+  border:1px solid rgba(31,41,55,.95);
+  background:#020617;
+  color:var(--text);
   outline:none;
 }
 input:focus,select:focus{
@@ -145,10 +109,15 @@ input:focus,select:focus{
 }
 
 button{
-  width:100%;margin-top:16px;padding:14px;
-  border-radius:999px;border:none;
+  width:100%;
+  margin-top:16px;
+  padding:14px;
+  border-radius:999px;
+  border:none;
   background:linear-gradient(120deg,#22c55e,#16a34a);
-  color:#022c22;font-weight:950;cursor:pointer;
+  color:#022c22;
+  font-weight:950;
+  cursor:pointer;
 }
 button.secondary{
   background:rgba(148,163,184,.10);
@@ -174,9 +143,7 @@ button.secondary{
   border-bottom:1px solid rgba(31,41,55,.6);
 }
 .kpi:last-child{border-bottom:none}
-.kpi .left{
-  display:flex;align-items:center;gap:10px;min-width:0;
-}
+.kpi .left{display:flex;align-items:center;gap:10px;min-width:0}
 .icon{
   width:28px;height:28px;border-radius:10px;
   display:grid;place-items:center;
@@ -186,7 +153,6 @@ button.secondary{
 .icon.good{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.28)}
 .icon.warn{background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.28)}
 .icon.bad{background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.28)}
-.kpi b{font-weight:950}
 .kpi .name{color:var(--text);font-weight:900}
 .kpi .sub{color:var(--muted);font-size:11px;margin-top:2px}
 .kpi .right{font-weight:950;white-space:nowrap}
@@ -246,16 +212,16 @@ footer{
     </select>
 
     <label>Kilométrage actuel</label>
-    <input id="kmNow" type="number" placeholder="ex: 72500">
+    <input id="kmNow" type="number" placeholder="ex: 72 500">
 
     <label>Dernière vidange (km)</label>
-    <input id="kmOil" type="number" placeholder="ex: 65000">
+    <input id="kmOil" type="number" placeholder="ex: 65 000">
 
     <label>Dernier contrôle freins (km)</label>
-    <input id="kmBrakes" type="number" placeholder="ex: 60000">
+    <input id="kmBrakes" type="number" placeholder="ex: 60 000">
 
     <label>Dernier contrôle pneus (km)</label>
-    <input id="kmTires" type="number" placeholder="ex: 58000">
+    <input id="kmTires" type="number" placeholder="ex: 58 000">
 
     <button onclick="calculate()">Calculer l’entretien</button>
     <button class="secondary" onclick="saveHistory()">Ajouter à l’historique</button>
@@ -329,11 +295,7 @@ function calculate(){
   const fmt = (n)=>Number(n).toLocaleString("fr-FR");
 
   // store last calc for history
-  window.__lastCalc = {
-    v,u,km,oil,br,ti,
-    oilNext,brNext,tiNext,
-    remOil,remBr,remTi
-  };
+  window.__lastCalc = { v,u,km,oil,br,ti, oilNext,brNext,tiNext, remOil,remBr,remTi };
 
   document.getElementById("output").innerHTML = `
     <div class="result">
@@ -386,23 +348,25 @@ function saveHistory(){
     alert("Fais un calcul avant d’ajouter à l’historique.");
     return;
   }
-  const h = JSON.parse(localStorage.getItem("autocare_history_v3")||"[]");
+  const h = JSON.parse(localStorage.getItem("autocare_history_clean")||"[]");
   h.unshift({
     date:new Date().toLocaleString("fr-FR"),
     data: window.__lastCalc
   });
-  localStorage.setItem("autocare_history_v3", JSON.stringify(h.slice(0,30)));
+  localStorage.setItem("autocare_history_clean", JSON.stringify(h.slice(0,30)));
   renderHistory();
 }
 
 function renderHistory(){
-  const h = JSON.parse(localStorage.getItem("autocare_history_v3")||"[]");
+  const h = JSON.parse(localStorage.getItem("autocare_history_clean")||"[]");
   const box = document.getElementById("history");
   const fmt = (n)=>Number(n).toLocaleString("fr-FR");
+
   if(!h.length){
     box.innerHTML = "<div class='muted' style='margin-top:10px;font-size:12px'>Aucun historique pour l’instant.</div>";
     return;
   }
+
   box.innerHTML = h.map(e=>{
     const d = e.data;
     const who = d.v==="bike" ? "Moto" : "Voiture";
