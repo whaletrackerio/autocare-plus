@@ -46,22 +46,18 @@ body::after{
   filter: blur(120px);
   opacity:.35;
 }
-/* Lueur verte (voiture) */
 body::before{
   left:-120px;
   background:radial-gradient(circle at 30% 50%, rgba(34,197,94,.45), transparent 60%);
 }
-/* Lueur violette (moto) */
 body::after{
   right:-120px;
   background:radial-gradient(circle at 70% 50%, rgba(168,85,247,.45), transparent 60%);
 }
-/* Mobile : plus discret */
 @media(max-width:900px){
   body::before, body::after{opacity:.18;}
 }
 
-/* Header sticky */
 header{
   position:sticky;top:0;z-index:10;
   background:rgba(2,6,23,.82);
@@ -69,19 +65,10 @@ header{
   border-bottom:1px solid rgba(31,41,55,.85);
   padding:14px 14px 12px;
 }
-header h1{
-  font-size:22px;
-  font-weight:950;
-  letter-spacing:.2px;
-}
-header p{
-  font-size:12px;
-  color:var(--muted);
-  margin-top:4px;
-}
+header h1{font-size:22px;font-weight:950;letter-spacing:.2px}
+header p{font-size:12px;color:var(--muted);margin-top:4px}
 
-/* Contenu au-dessus du décor */
-.wrap{position:relative;z-index:1;max-width:560px;margin:0 auto;padding:16px 14px 70px}
+.wrap{position:relative;z-index:1;max-width:620px;margin:0 auto;padding:16px 14px 80px}
 
 .card{
   background:rgba(15,23,42,.88);
@@ -91,6 +78,9 @@ header p{
   margin-bottom:16px;
   box-shadow:var(--shadow);
 }
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:560px){.grid2{grid-template-columns:1fr}}
 
 label{font-size:12px;color:var(--muted);display:block;margin-top:12px}
 input,select{
@@ -106,6 +96,21 @@ input,select{
 input:focus,select:focus{
   border-color:rgba(34,197,94,.6);
   box-shadow:0 0 0 3px rgba(34,197,94,.12);
+}
+
+.input-error{
+  border-color:rgba(239,68,68,.6)!important;
+  box-shadow:0 0 0 3px rgba(239,68,68,.10)!important;
+}
+.help{
+  margin-top:8px;
+  padding:10px 12px;
+  border-radius:14px;
+  background:rgba(245,158,11,.10);
+  border:1px solid rgba(245,158,11,.25);
+  color:var(--text);
+  font-size:12px;
+  display:none;
 }
 
 button{
@@ -124,6 +129,9 @@ button.secondary{
   color:var(--text);
   border:1px solid rgba(148,163,184,.22);
 }
+.rowbtn{display:flex;gap:10px;margin-top:12px}
+.rowbtn button{margin-top:0}
+@media(max-width:560px){.rowbtn{flex-direction:column}}
 
 .result{
   margin-top:14px;
@@ -135,12 +143,8 @@ button.secondary{
 }
 
 .kpi{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  padding:10px 0;
-  border-bottom:1px solid rgba(31,41,55,.6);
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:10px 0;border-bottom:1px solid rgba(31,41,55,.6);
 }
 .kpi:last-child{border-bottom:none}
 .kpi .left{display:flex;align-items:center;gap:10px;min-width:0}
@@ -178,6 +182,19 @@ button.secondary{
 }
 .history-item:last-child{border-bottom:none}
 .muted{color:var(--muted)}
+small{color:var(--muted)}
+
+.toast{
+  position:fixed;left:50%;bottom:16px;transform:translateX(-50%);
+  background:rgba(2,6,23,.92);
+  border:1px solid rgba(31,41,55,.85);
+  padding:10px 12px;border-radius:14px;
+  color:var(--text);
+  font-size:12px;
+  display:none;
+  max-width:92vw;
+  z-index:999;
+}
 
 footer{
   text-align:center;
@@ -189,7 +206,6 @@ footer{
 </head>
 
 <body>
-
 <header>
   <h1>AutoCare+</h1>
   <p>Entretien intelligent — voiture & moto</p>
@@ -197,38 +213,169 @@ footer{
 
 <div class="wrap">
 
+  <!-- GARAGE -->
   <div class="card">
-    <label>Type de véhicule</label>
-    <select id="vehicle">
-      <option value="car">Voiture</option>
-      <option value="bike">Moto</option>
-    </select>
+    <b style="font-weight:950">Garage</b>
+    <div class="muted" style="margin-top:6px;font-size:12px">Gère plusieurs véhicules et bascule en 1 clic.</div>
 
-    <label>Type d’usage</label>
-    <select id="usage">
-      <option value="city">Ville</option>
-      <option value="mixed" selected>Mixte</option>
-      <option value="road">Route</option>
-    </select>
+    <label>Véhicule actif</label>
+    <select id="garageSelect"></select>
 
-    <label>Kilométrage actuel</label>
-    <input id="kmNow" type="number" placeholder="ex: 72 500">
+    <div class="rowbtn">
+      <button class="secondary" onclick="openAdd()">➕ Ajouter un véhicule</button>
+      <button class="secondary" onclick="openEdit()">✏️ Modifier</button>
+      <button class="secondary" onclick="removeVehicle()">🗑️ Supprimer</button>
+    </div>
 
-    <label>Dernière vidange (km)</label>
-    <input id="kmOil" type="number" placeholder="ex: 65 000">
+    <div id="garageForm" style="display:none;margin-top:10px">
+      <div class="grid2">
+        <div>
+          <label>Nom (ex: Clio, MT-07)</label>
+          <input id="vName" type="text" placeholder="Mon véhicule">
+        </div>
+        <div>
+          <label>Type</label>
+          <select id="vType">
+            <option value="car">Voiture</option>
+            <option value="bike">Moto</option>
+          </select>
+        </div>
+      </div>
 
-    <label>Dernier contrôle freins (km)</label>
-    <input id="kmBrakes" type="number" placeholder="ex: 60 000">
+      <label>Type d’usage</label>
+      <select id="vUsage">
+        <option value="city">Ville</option>
+        <option value="mixed" selected>Mixte</option>
+        <option value="road">Route</option>
+      </select>
+
+      <div class="grid2">
+        <div>
+          <label>Km actuel</label>
+          <input id="vKmNow" type="number" placeholder="ex: 72500">
+        </div>
+        <div>
+          <label>Km / semaine (pour estimer la date)</label>
+          <input id="vKmWeek" type="number" placeholder="ex: 250">
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div>
+          <label>Dernière vidange (km)</label>
+          <input id="vKmOil" type="number" placeholder="ex: 65000">
+        </div>
+        <div>
+          <label>Dernier contrôle freins (km)</label>
+          <input id="vKmBrakes" type="number" placeholder="ex: 60000">
+        </div>
+      </div>
+
+      <label>Dernier contrôle pneus (km)</label>
+      <input id="vKmTires" type="number" placeholder="ex: 58000">
+
+      <div class="rowbtn">
+        <button onclick="saveVehicle()">💾 Enregistrer</button>
+        <button class="secondary" onclick="closeGarageForm()">Annuler</button>
+      </div>
+
+      <div class="help" id="garageHelp"></div>
+    </div>
+  </div>
+
+  <!-- CALCUL -->
+  <div class="card">
+    <b style="font-weight:950">Entretien</b>
+    <div class="muted" style="margin-top:6px;font-size:12px">Les champs se remplissent depuis le véhicule actif.</div>
+
+    <div class="grid2">
+      <div>
+        <label>Type de véhicule</label>
+        <select id="vehicle" disabled>
+          <option value="car">Voiture</option>
+          <option value="bike">Moto</option>
+        </select>
+      </div>
+      <div>
+        <label>Type d’usage</label>
+        <select id="usage" disabled>
+          <option value="city">Ville</option>
+          <option value="mixed" selected>Mixte</option>
+          <option value="road">Route</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div>
+        <label>Kilométrage actuel</label>
+        <input id="kmNow" type="number" placeholder="ex: 72 500">
+      </div>
+      <div>
+        <label>Km / semaine (estimation date)</label>
+        <input id="kmWeek" type="number" placeholder="ex: 250">
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div>
+        <label>Dernière vidange (km)</label>
+        <input id="kmOil" type="number" placeholder="ex: 65 000">
+      </div>
+      <div>
+        <label>Dernier contrôle freins (km)</label>
+        <input id="kmBrakes" type="number" placeholder="ex: 60 000">
+      </div>
+    </div>
 
     <label>Dernier contrôle pneus (km)</label>
     <input id="kmTires" type="number" placeholder="ex: 58 000">
 
+    <div class="help" id="formHelp"></div>
+
     <button onclick="calculate()">Calculer l’entretien</button>
-    <button class="secondary" onclick="saveHistory()">Ajouter à l’historique</button>
+
+    <div class="rowbtn">
+      <button class="secondary" onclick="addToHistory()">Ajouter à l’historique</button>
+      <button class="secondary" onclick="downloadICS()">📅 Export calendrier (.ics)</button>
+    </div>
 
     <div id="output"></div>
   </div>
 
+  <!-- RAPPELS -->
+  <div class="card">
+    <b style="font-weight:950">Rappels</b>
+    <div class="muted" style="margin-top:6px;font-size:12px">
+      Les notifications fonctionnent si l’app est ouverte (ou parfois en arrière-plan selon le navigateur).
+    </div>
+
+    <label>Me prévenir quand il reste (km)</label>
+    <div class="grid2">
+      <div>
+        <input id="notifyThreshold" type="number" placeholder="ex: 500">
+        <small>Ex: 500 = alerte quand il reste ≤ 500 km</small>
+      </div>
+      <div>
+        <select id="notifyItems">
+          <option value="all">Tout (vidange + freins + pneus)</option>
+          <option value="oil">Vidange</option>
+          <option value="brakes">Freins</option>
+          <option value="tires">Pneus</option>
+        </select>
+        <small>Choisir un type ou tout</small>
+      </div>
+    </div>
+
+    <div class="rowbtn">
+      <button class="secondary" onclick="enableNotifications()">🔔 Activer les notifications</button>
+      <button class="secondary" onclick="saveReminderSettings()">💾 Sauver réglages</button>
+    </div>
+
+    <div class="muted" style="margin-top:10px;font-size:12px" id="notifStatus">Statut : —</div>
+  </div>
+
+  <!-- HISTORIQUE -->
   <div class="card">
     <b style="font-weight:950">Historique</b>
     <div id="history" style="margin-top:10px"></div>
@@ -238,10 +385,50 @@ footer{
     © 2025 AutoCare+ — Première publication publique : Décembre 2025<br>
     Données indicatives • Aucun compte requis
   </footer>
-
 </div>
 
+<div class="toast" id="toast"></div>
+
 <script>
+/* -------------------------
+  Storage keys
+------------------------- */
+const KEY_GARAGE = "autocare_garage_v1";
+const KEY_ACTIVE = "autocare_active_vehicle_v1";
+const KEY_HISTORY = "autocare_history_v2";
+const KEY_REMIND = "autocare_reminders_v1";
+const KEY_NOTIFIED = "autocare_notified_v1";
+
+/* -------------------------
+  Helpers
+------------------------- */
+const $ = (id)=>document.getElementById(id);
+const fmt = (n)=>Number(n).toLocaleString("fr-FR");
+const clampInt = (v)=> {
+  const n = Math.floor(Number(v));
+  return Number.isFinite(n) ? n : 0;
+};
+function toast(msg){
+  const t = $("toast");
+  t.textContent = msg;
+  t.style.display = "block";
+  clearTimeout(window.__toastT);
+  window.__toastT = setTimeout(()=> t.style.display="none", 1800);
+}
+function clearErrors(){
+  ["kmNow","kmOil","kmBrakes","kmTires","kmWeek"].forEach(id=>$(id).classList.remove("input-error"));
+  $("formHelp").style.display="none";
+  $("formHelp").textContent="";
+}
+function showFormError(message, fields=[]){
+  fields.forEach(id=>$(id).classList.add("input-error"));
+  $("formHelp").style.display="block";
+  $("formHelp").textContent = "⚠️ " + message;
+}
+
+/* -------------------------
+  Business logic
+------------------------- */
 function factorUsage(u){
   if(u==="city") return 0.8;
   if(u==="road") return 1.2;
@@ -259,52 +446,278 @@ function tagForRemaining(rem){
   return {cls:"good", txt:"OK"};
 }
 
-function calculate(){
-  const v = document.getElementById("vehicle").value;
-  const u = document.getElementById("usage").value;
+/* -------------------------
+  Garage (multi-vehicles)
+------------------------- */
+function getGarage(){
+  try{ return JSON.parse(localStorage.getItem(KEY_GARAGE) || "[]"); }
+  catch(e){ return []; }
+}
+function setGarage(arr){
+  localStorage.setItem(KEY_GARAGE, JSON.stringify(arr));
+}
+function getActiveId(){
+  return localStorage.getItem(KEY_ACTIVE) || "";
+}
+function setActiveId(id){
+  localStorage.setItem(KEY_ACTIVE, id);
+}
+function uid(){
+  return (crypto?.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2));
+}
 
-  const km = Number(document.getElementById("kmNow").value);
-  const oil = Number(document.getElementById("kmOil").value);
-  const br  = Number(document.getElementById("kmBrakes").value);
-  const ti  = Number(document.getElementById("kmTires").value);
+let garageMode = "add"; // add or edit
 
-  if(!km || km <= 0){
-    alert("Kilométrage actuel requis.");
+function ensureDefaultGarage(){
+  const g = getGarage();
+  if(g.length) return;
+  const def = {
+    id: uid(),
+    name: "Mon véhicule",
+    type: "car",
+    usage: "mixed",
+    kmNow: 0,
+    kmWeek: 0,
+    kmOil: 0,
+    kmBrakes: 0,
+    kmTires: 0
+  };
+  setGarage([def]);
+  setActiveId(def.id);
+}
+
+function renderGarageSelect(){
+  const g = getGarage();
+  const active = getActiveId();
+  const sel = $("garageSelect");
+  sel.innerHTML = g.map(v=>{
+    const is = v.id === active ? "selected" : "";
+    const badge = v.type === "bike" ? "🏍️" : "🚗";
+    return `<option value="${v.id}" ${is}>${badge} ${v.name}</option>`;
+  }).join("");
+}
+
+function loadActiveVehicleToForm(){
+  const g = getGarage();
+  const active = getActiveId();
+  const v = g.find(x=>x.id===active) || g[0];
+  if(!v) return;
+
+  // mirror in disabled selects
+  $("vehicle").value = v.type;
+  $("usage").value = v.usage;
+
+  // main form fields
+  $("kmNow").value = v.kmNow || "";
+  $("kmWeek").value = v.kmWeek || "";
+  $("kmOil").value = v.kmOil || "";
+  $("kmBrakes").value = v.kmBrakes || "";
+  $("kmTires").value = v.kmTires || "";
+
+  // reset last calc display
+  $("output").innerHTML = "";
+  window.__lastCalc = null;
+}
+
+$("garageSelect").addEventListener("change", ()=>{
+  setActiveId($("garageSelect").value);
+  loadActiveVehicleToForm();
+  toast("Véhicule changé");
+});
+
+function openAdd(){
+  garageMode="add";
+  $("garageForm").style.display="block";
+  $("garageHelp").style.display="none";
+  $("garageHelp").textContent="";
+  $("vName").value="";
+  $("vType").value="car";
+  $("vUsage").value="mixed";
+  $("vKmNow").value="";
+  $("vKmWeek").value="";
+  $("vKmOil").value="";
+  $("vKmBrakes").value="";
+  $("vKmTires").value="";
+}
+
+function openEdit(){
+  const g = getGarage();
+  const v = g.find(x=>x.id===getActiveId());
+  if(!v){ toast("Aucun véhicule"); return; }
+  garageMode="edit";
+  $("garageForm").style.display="block";
+  $("garageHelp").style.display="none";
+  $("garageHelp").textContent="";
+  $("vName").value=v.name || "";
+  $("vType").value=v.type || "car";
+  $("vUsage").value=v.usage || "mixed";
+  $("vKmNow").value=v.kmNow || "";
+  $("vKmWeek").value=v.kmWeek || "";
+  $("vKmOil").value=v.kmOil || "";
+  $("vKmBrakes").value=v.kmBrakes || "";
+  $("vKmTires").value=v.kmTires || "";
+}
+
+function closeGarageForm(){
+  $("garageForm").style.display="none";
+}
+
+function garageError(msg){
+  $("garageHelp").style.display="block";
+  $("garageHelp").textContent="⚠️ " + msg;
+}
+
+function saveVehicle(){
+  const name = ($("vName").value || "").trim();
+  const type = $("vType").value;
+  const usage = $("vUsage").value;
+  const kmNow = clampInt($("vKmNow").value);
+  const kmWeek = clampInt($("vKmWeek").value);
+  const kmOil = clampInt($("vKmOil").value);
+  const kmBrakes = clampInt($("vKmBrakes").value);
+  const kmTires = clampInt($("vKmTires").value);
+
+  if(!name){ garageError("Donne un nom au véhicule."); return; }
+  if(kmOil && kmOil > kmNow){ garageError("Dernière vidange ne peut pas dépasser le km actuel."); return; }
+  if(kmBrakes && kmBrakes > kmNow){ garageError("Freins : valeur > km actuel."); return; }
+  if(kmTires && kmTires > kmNow){ garageError("Pneus : valeur > km actuel."); return; }
+
+  const g = getGarage();
+
+  if(garageMode==="add"){
+    const v = {id:uid(), name, type, usage, kmNow, kmWeek, kmOil, kmBrakes, kmTires};
+    g.unshift(v);
+    setGarage(g);
+    setActiveId(v.id);
+    renderGarageSelect();
+    loadActiveVehicleToForm();
+    closeGarageForm();
+    toast("Véhicule ajouté ✅");
     return;
   }
 
-  const f = factorUsage(u);
-  const b = base(v);
+  // edit
+  const active = getActiveId();
+  const idx = g.findIndex(x=>x.id===active);
+  if(idx<0){ garageError("Impossible de modifier."); return; }
+  g[idx] = {...g[idx], name, type, usage, kmNow, kmWeek, kmOil, kmBrakes, kmTires};
+  setGarage(g);
+  renderGarageSelect();
+  loadActiveVehicleToForm();
+  closeGarageForm();
+  toast("Véhicule modifié ✅");
+}
 
-  const oilInterval = Math.round(b.oil*f);
-  const brInterval  = Math.round(b.brakes*f);
-  const tiInterval  = Math.round(b.tires*f);
+function removeVehicle(){
+  const g = getGarage();
+  if(g.length <= 1){
+    alert("Garde au moins 1 véhicule.");
+    return;
+  }
+  if(!confirm("Supprimer ce véhicule ?")) return;
+  const active = getActiveId();
+  const ng = g.filter(x=>x.id!==active);
+  setGarage(ng);
+  setActiveId(ng[0].id);
+  renderGarageSelect();
+  loadActiveVehicleToForm();
+  toast("Supprimé");
+}
 
-  const oilNext = (oil||km) + oilInterval;
-  const brNext  = (br||km)  + brInterval;
-  const tiNext  = (ti||km)  + tiInterval;
+/* -------------------------
+  Main form save back to garage
+------------------------- */
+function syncFormToGarage(){
+  const g = getGarage();
+  const active = getActiveId();
+  const idx = g.findIndex(x=>x.id===active);
+  if(idx<0) return;
 
-  const remOil = oilNext - km;
-  const remBr  = brNext  - km;
-  const remTi  = tiNext  - km;
+  g[idx] = {
+    ...g[idx],
+    kmNow: clampInt($("kmNow").value),
+    kmWeek: clampInt($("kmWeek").value),
+    kmOil: clampInt($("kmOil").value),
+    kmBrakes: clampInt($("kmBrakes").value),
+    kmTires: clampInt($("kmTires").value),
+  };
+  setGarage(g);
+}
+
+/* -------------------------
+  Calculate + validation
+------------------------- */
+function calculate(){
+  clearErrors();
+
+  const g = getGarage();
+  const vObj = g.find(x=>x.id===getActiveId());
+  if(!vObj){ showFormError("Aucun véhicule actif.", []); return; }
+
+  const type = vObj.type;
+  const usage = vObj.usage;
+
+  const kmNow = clampInt($("kmNow").value);
+  const kmWeek = clampInt($("kmWeek").value);
+  const kmOil = clampInt($("kmOil").value);
+  const kmBrakes = clampInt($("kmBrakes").value);
+  const kmTires = clampInt($("kmTires").value);
+
+  if(!kmNow){
+    showFormError("Entre le kilométrage actuel.", ["kmNow"]);
+    return;
+  }
+  if(kmOil && kmOil > kmNow){
+    showFormError("La dernière vidange ne peut pas dépasser le km actuel.", ["kmOil","kmNow"]);
+    return;
+  }
+  if(kmBrakes && kmBrakes > kmNow){
+    showFormError("Le dernier contrôle freins ne peut pas dépasser le km actuel.", ["kmBrakes","kmNow"]);
+    return;
+  }
+  if(kmTires && kmTires > kmNow){
+    showFormError("Le dernier contrôle pneus ne peut pas dépasser le km actuel.", ["kmTires","kmNow"]);
+    return;
+  }
+
+  const f = factorUsage(usage);
+  const b = base(type);
+
+  const oilInterval = Math.round(b.oil * f);
+  const brInterval  = Math.round(b.brakes * f);
+  const tiInterval  = Math.round(b.tires * f);
+
+  const oilNext = (kmOil || kmNow) + oilInterval;
+  const brNext  = (kmBrakes || kmNow) + brInterval;
+  const tiNext  = (kmTires || kmNow) + tiInterval;
+
+  const remOil = oilNext - kmNow;
+  const remBr  = brNext  - kmNow;
+  const remTi  = tiNext  - kmNow;
 
   const tOil = tagForRemaining(remOil);
   const tBr  = tagForRemaining(remBr);
   const tTi  = tagForRemaining(remTi);
 
-  const fmt = (n)=>Number(n).toLocaleString("fr-FR");
+  window.__lastCalc = {
+    at: Date.now(),
+    vehicleId: vObj.id,
+    name: vObj.name,
+    type, usage,
+    kmNow, kmWeek,
+    kmOil, kmBrakes, kmTires,
+    oilNext, brNext, tiNext,
+    remOil, remBr, remTi
+  };
 
-  // store last calc for history
-  window.__lastCalc = { v,u,km,oil,br,ti, oilNext,brNext,tiNext, remOil,remBr,remTi };
-
-  document.getElementById("output").innerHTML = `
+  $("output").innerHTML = `
     <div class="result">
       <div class="kpi">
         <div class="left">
           <div class="icon ${tOil.cls}">🛢️</div>
           <div style="min-width:0">
             <div class="name">Vidange</div>
-            <div class="sub">Reste ~ ${fmt(remOil)} km</div>
+            <div class="sub">Reste ~ ${fmt(remOil)} km • Intervalle ${fmt(oilInterval)} km</div>
           </div>
         </div>
         <div class="right">${fmt(oilNext)} km</div>
@@ -315,7 +728,7 @@ function calculate(){
           <div class="icon ${tBr.cls}">🛑</div>
           <div style="min-width:0">
             <div class="name">Freins (contrôle)</div>
-            <div class="sub">Reste ~ ${fmt(remBr)} km</div>
+            <div class="sub">Reste ~ ${fmt(remBr)} km • Intervalle ${fmt(brInterval)} km</div>
           </div>
         </div>
         <div class="right">${fmt(brNext)} km</div>
@@ -326,7 +739,7 @@ function calculate(){
           <div class="icon ${tTi.cls}">🛞</div>
           <div style="min-width:0">
             <div class="name">Pneus (contrôle)</div>
-            <div class="sub">Reste ~ ${fmt(remTi)} km</div>
+            <div class="sub">Reste ~ ${fmt(remTi)} km • Intervalle ${fmt(tiInterval)} km</div>
           </div>
         </div>
         <div class="right">${fmt(tiNext)} km</div>
@@ -337,52 +750,253 @@ function calculate(){
       <span class="tag ${tTi.cls}" style="margin-left:8px">Pneus : ${tTi.txt}</span>
 
       <div class="muted" style="margin-top:10px;font-size:11px">
-        Astuce : en “Ville”, l’intervalle est plus court. En “Route”, il est plus long.
+        Véhicule : <b>${escapeHtml(vObj.name)}</b> • ${type==="bike"?"Moto":"Voiture"} • ${usageLabel(usage)}
       </div>
     </div>
   `;
+
+  syncFormToGarage();
+  toast("Calcul OK ✅");
+  checkAndNotify(); // immediate check
 }
 
-function saveHistory(){
-  if(!window.__lastCalc){
-    alert("Fais un calcul avant d’ajouter à l’historique.");
-    return;
-  }
-  const h = JSON.parse(localStorage.getItem("autocare_history_clean")||"[]");
-  h.unshift({
-    date:new Date().toLocaleString("fr-FR"),
-    data: window.__lastCalc
-  });
-  localStorage.setItem("autocare_history_clean", JSON.stringify(h.slice(0,30)));
+function escapeHtml(s){
+  return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+}
+function usageLabel(u){
+  if(u==="city") return "Ville";
+  if(u==="road") return "Route";
+  return "Mixte";
+}
+
+/* -------------------------
+  History
+------------------------- */
+function getHistory(){
+  try{ return JSON.parse(localStorage.getItem(KEY_HISTORY) || "[]"); }
+  catch(e){ return []; }
+}
+function setHistory(arr){
+  localStorage.setItem(KEY_HISTORY, JSON.stringify(arr));
+}
+function addToHistory(){
+  if(!window.__lastCalc){ alert("Fais un calcul avant."); return; }
+  const h = getHistory();
+  h.unshift(window.__lastCalc);
+  setHistory(h.slice(0,60));
   renderHistory();
+  toast("Ajouté à l’historique ✅");
 }
-
 function renderHistory(){
-  const h = JSON.parse(localStorage.getItem("autocare_history_clean")||"[]");
-  const box = document.getElementById("history");
-  const fmt = (n)=>Number(n).toLocaleString("fr-FR");
-
+  const h = getHistory();
+  const box = $("history");
   if(!h.length){
     box.innerHTML = "<div class='muted' style='margin-top:10px;font-size:12px'>Aucun historique pour l’instant.</div>";
     return;
   }
-
   box.innerHTML = h.map(e=>{
-    const d = e.data;
-    const who = d.v==="bike" ? "Moto" : "Voiture";
-    const use = d.u==="city" ? "Ville" : (d.u==="road" ? "Route" : "Mixte");
+    const who = e.type==="bike" ? "Moto" : "Voiture";
+    const use = usageLabel(e.usage);
     return `
       <div class="history-item">
-        <b>${e.date}</b><br>
-        <span class="muted">${who} • ${use} • km: ${fmt(d.km)}</span><br>
-        🛢️ Vidange: <b>${fmt(d.oilNext)} km</b> •
-        🛑 Freins: <b>${fmt(d.brNext)} km</b> •
-        🛞 Pneus: <b>${fmt(d.tiNext)} km</b>
+        <b>${new Date(e.at).toLocaleString("fr-FR")}</b><br>
+        <span class="muted">${escapeHtml(e.name)} • ${who} • ${use} • km: ${fmt(e.kmNow)}</span><br>
+        🛢️ Vidange: <b>${fmt(e.oilNext)} km</b> •
+        🛑 Freins: <b>${fmt(e.brNext)} km</b> •
+        🛞 Pneus: <b>${fmt(e.tiNext)} km</b>
       </div>
     `;
   }).join("");
 }
-renderHistory();
+
+/* -------------------------
+  Reminders (notifications + settings)
+------------------------- */
+function getRemind(){
+  try{
+    return JSON.parse(localStorage.getItem(KEY_REMIND) || "{}");
+  }catch(e){ return {}; }
+}
+function setRemind(obj){
+  localStorage.setItem(KEY_REMIND, JSON.stringify(obj));
+}
+function updateNotifStatus(){
+  const p = ("Notification" in window) ? Notification.permission : "unsupported";
+  $("notifStatus").textContent = ("Notification" in window)
+    ? `Statut : ${p}`
+    : "Statut : notifications non supportées sur ce navigateur";
+}
+updateNotifStatus();
+
+function enableNotifications(){
+  if(!("Notification" in window)){
+    alert("Notifications non supportées sur ce navigateur.");
+    return;
+  }
+  Notification.requestPermission().then(()=>{
+    updateNotifStatus();
+    toast("Permission notifications mise à jour");
+    checkAndNotify();
+  });
+}
+
+function saveReminderSettings(){
+  const threshold = clampInt($("notifyThreshold").value);
+  const items = $("notifyItems").value;
+  if(!threshold){
+    alert("Entre un seuil (ex: 500).");
+    return;
+  }
+  const r = getRemind();
+  r.threshold = threshold;
+  r.items = items;
+  setRemind(r);
+  toast("Réglages rappels sauvegardés 💾");
+  checkAndNotify();
+}
+
+function getNotifiedMap(){
+  try{ return JSON.parse(localStorage.getItem(KEY_NOTIFIED) || "{}"); }
+  catch(e){ return {}; }
+}
+function setNotifiedMap(m){
+  localStorage.setItem(KEY_NOTIFIED, JSON.stringify(m));
+}
+
+function notify(title, body){
+  try{
+    if(Notification.permission !== "granted") return;
+    new Notification(title, { body });
+  }catch(e){}
+}
+
+function checkAndNotify(){
+  const r = getRemind();
+  if(!r.threshold) return;
+  if(!window.__lastCalc) return;
+  if(!("Notification" in window) || Notification.permission !== "granted") return;
+
+  const d = window.__lastCalc;
+  const th = r.threshold;
+  const items = r.items || "all";
+
+  const map = getNotifiedMap();
+  const vid = d.vehicleId;
+
+  function maybe(key, label, remaining, targetKm){
+    if(items !== "all" && items !== key) return;
+    if(remaining > th) return;
+
+    // avoid spam: notify once per targetKm
+    const mapKey = `${vid}:${key}`;
+    if(map[mapKey] === targetKm) return;
+
+    notify(`AutoCare+ — ${label}`, `${d.name} : il reste ~ ${fmt(remaining)} km (objectif ${fmt(targetKm)} km)`);
+    map[mapKey] = targetKm;
+  }
+
+  maybe("oil","Vidange", d.remOil, d.oilNext);
+  maybe("brakes","Freins", d.remBr, d.brNext);
+  maybe("tires","Pneus", d.remTi, d.tiNext);
+
+  setNotifiedMap(map);
+}
+
+/* check periodically while page open */
+setInterval(checkAndNotify, 60 * 1000);
+
+/* load reminder settings on start */
+(function initReminders(){
+  const r = getRemind();
+  if(r.threshold) $("notifyThreshold").value = r.threshold;
+  if(r.items) $("notifyItems").value = r.items;
+})();
+
+/* -------------------------
+  Calendar export (.ics)
+  Uses km/week to estimate a date
+------------------------- */
+function daysFromKm(remainingKm, kmWeek){
+  if(!kmWeek || kmWeek <= 0) return null;
+  const kmPerDay = kmWeek / 7;
+  if(kmPerDay <= 0) return null;
+  return Math.max(0, Math.round(remainingKm / kmPerDay));
+}
+function ymd(date){
+  const y = date.getFullYear();
+  const m = String(date.getMonth()+1).padStart(2,"0");
+  const d = String(date.getDate()).padStart(2,"0");
+  return `${y}${m}${d}`;
+}
+function downloadText(filename, content){
+  const blob = new Blob([content], {type:"text/calendar;charset=utf-8"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+function makeICS(title, date){
+  // all-day event
+  const dt = ymd(date);
+  const uidv = uid();
+  return [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//AutoCare+//FR",
+    "CALSCALE:GREGORIAN",
+    "BEGIN:VEVENT",
+    `UID:${uidv}`,
+    `DTSTAMP:${dt}T000000Z`,
+    `DTSTART;VALUE=DATE:${dt}`,
+    `DTEND;VALUE=DATE:${dt}`, // all-day single-day
+    `SUMMARY:${title}`,
+    "END:VEVENT",
+    "END:VCALENDAR"
+  ].join("\n");
+}
+function downloadICS(){
+  if(!window.__lastCalc){
+    alert("Fais un calcul avant d’exporter le calendrier.");
+    return;
+  }
+  const d = window.__lastCalc;
+  const kmWeek = clampInt($("kmWeek").value);
+
+  const daysOil = daysFromKm(d.remOil, kmWeek);
+  const daysBr  = daysFromKm(d.remBr, kmWeek);
+  const daysTi  = daysFromKm(d.remTi, kmWeek);
+
+  // If km/week not provided, fallback to “today” reminders (still useful)
+  const now = new Date();
+  const dateOil = new Date(now); dateOil.setDate(now.getDate() + (daysOil ?? 0));
+  const dateBr  = new Date(now); dateBr.setDate(now.getDate() + (daysBr  ?? 0));
+  const dateTi  = new Date(now); dateTi.setDate(now.getDate() + (daysTi  ?? 0));
+
+  const safeName = (d.name || "vehicule").toLowerCase().replace(/[^a-z0-9]+/g,"-").slice(0,30) || "vehicule";
+  const ics =
+    makeICS(`AutoCare+ • ${d.name} • Vidange (≈ ${fmt(d.oilNext)} km)`, dateOil) + "\n" +
+    makeICS(`AutoCare+ • ${d.name} • Freins (≈ ${fmt(d.brNext)} km)`, dateBr) + "\n" +
+    makeICS(`AutoCare+ • ${d.name} • Pneus (≈ ${fmt(d.tiNext)} km)`, dateTi);
+
+  downloadText(`autocare-${safeName}.ics`, ics);
+  toast("Calendrier exporté 📅");
+}
+
+/* -------------------------
+  Init
+------------------------- */
+function init(){
+  ensureDefaultGarage();
+  renderGarageSelect();
+  loadActiveVehicleToForm();
+  renderHistory();
+  updateNotifStatus();
+}
+init();
 </script>
 
 </body>
