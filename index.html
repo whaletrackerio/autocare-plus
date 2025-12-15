@@ -1,1223 +1,198 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#050816">
-<title>AutoCare+ — Entretien intelligent</title>
+  <meta charset="UTF-8" />
+  <title>AutoCare+ — Entretien véhicule</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-<style>
-:root{
-  --bg:#050816;
-  --card:#0f172a;
-  --border:#1f2937;
-  --text:#e5e7eb;
-  --muted:#9ca3af;
-  --accent:#22c55e;
-  --accent2:#a855f7;
-  --warn:#f59e0b;
-  --bad:#ef4444;
-  --radius:18px;
-  --shadow:0 18px 45px rgba(0,0,0,.55);
-}
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%}
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#22c55e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-body{
-  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-  color:var(--text);
-  background:
-    radial-gradient(900px 520px at 20% -10%, rgba(34,197,94,.20), transparent 60%),
-    radial-gradient(800px 520px at 85% 0%, rgba(168,85,247,.20), transparent 60%),
-    linear-gradient(180deg,#020617,var(--bg));
-  overflow-x:hidden;
-}
+  <style>
+    :root {
+      --bg:#050816;
+      --card:#0f172a;
+      --text:#e5e7eb;
+      --muted:#9ca3af;
+      --accent:#22c55e;
+      --border:#1f2937;
+      --radius:16px;
+    }
 
-/* ambiance premium */
-body::before, body::after{
-  content:"";
-  position:fixed; top:0; bottom:0; width:420px;
-  pointer-events:none; z-index:0;
-  filter: blur(120px); opacity:.35;
-}
-body::before{
-  left:-120px;
-  background:radial-gradient(circle at 30% 50%, rgba(34,197,94,.45), transparent 60%);
-}
-body::after{
-  right:-120px;
-  background:radial-gradient(circle at 70% 50%, rgba(168,85,247,.45), transparent 60%);
-}
-@media(max-width:900px){ body::before, body::after{opacity:.18;} }
+    * { box-sizing:border-box; margin:0; padding:0 }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(180deg, #050816, #020617);
+      color: var(--text);
+      min-height:100vh;
+    }
 
-header{
-  position:sticky;top:0;z-index:10;
-  background:rgba(2,6,23,.82);
-  backdrop-filter:blur(12px);
-  border-bottom:1px solid rgba(31,41,55,.85);
-  padding:14px 14px 12px;
-}
-header .toprow{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
-header h1{font-size:22px;font-weight:950;letter-spacing:.2px}
-header p{font-size:12px;color:var(--muted);margin-top:4px}
+    header {
+      padding:20px;
+      text-align:center;
+      border-bottom:1px solid var(--border);
+    }
 
-.pill{
-  display:inline-flex;align-items:center;gap:8px;
-  padding:8px 10px;border-radius:999px;
-  font-size:11px;font-weight:950;
-  border:1px solid rgba(148,163,184,.18);
-  background:rgba(148,163,184,.10);
-  color:var(--text);
-  cursor:pointer;
-}
-.pill.pro{
-  border-color:rgba(34,197,94,.25);
-  background:rgba(34,197,94,.12);
-  color:var(--accent);
-}
+    header h1 {
+      font-size:1.6rem;
+      color: var(--accent);
+    }
 
-.wrap{position:relative;z-index:1;max-width:680px;margin:0 auto;padding:16px 14px 80px}
+    header p {
+      margin-top:6px;
+      color: var(--muted);
+      font-size:0.9rem;
+    }
 
-.card{
-  background:rgba(15,23,42,.88);
-  border:1px solid rgba(31,41,55,.92);
-  border-radius:var(--radius);
-  padding:16px;
-  margin-bottom:16px;
-  box-shadow:var(--shadow);
-}
+    main {
+      padding:20px;
+      max-width:900px;
+      margin:auto;
+      display:grid;
+      gap:20px;
+    }
 
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-@media(max-width:560px){.grid2,.grid3{grid-template-columns:1fr}}
+    .card {
+      background: var(--card);
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      padding:20px;
+    }
 
-label{font-size:12px;color:var(--muted);display:block;margin-top:12px}
-input,select{
-  width:100%;
-  margin-top:6px;
-  padding:12px;
-  border-radius:12px;
-  border:1px solid rgba(31,41,55,.95);
-  background:#020617;
-  color:var(--text);
-  outline:none;
-}
-input:focus,select:focus{
-  border-color:rgba(34,197,94,.6);
-  box-shadow:0 0 0 3px rgba(34,197,94,.12);
-}
-.input-error{
-  border-color:rgba(239,68,68,.6)!important;
-  box-shadow:0 0 0 3px rgba(239,68,68,.10)!important;
-}
+    .card h2 {
+      font-size:1.2rem;
+      margin-bottom:12px;
+    }
 
-.help{
-  margin-top:10px;
-  padding:10px 12px;
-  border-radius:14px;
-  background:rgba(245,158,11,.10);
-  border:1px solid rgba(245,158,11,.25);
-  color:var(--text);
-  font-size:12px;
-  display:none;
-}
+    label {
+      display:block;
+      font-size:0.85rem;
+      color: var(--muted);
+      margin-bottom:6px;
+    }
 
-button{
-  width:100%;
-  margin-top:16px;
-  padding:14px;
-  border-radius:999px;
-  border:none;
-  background:linear-gradient(120deg,#22c55e,#16a34a);
-  color:#022c22;
-  font-weight:950;
-  cursor:pointer;
-}
-button.secondary{
-  background:rgba(148,163,184,.10);
-  color:var(--text);
-  border:1px solid rgba(148,163,184,.22);
-}
-button.danger{
-  background:rgba(239,68,68,.12);
-  color:#fecaca;
-  border:1px solid rgba(239,68,68,.24);
-}
-button:disabled{
-  opacity:.55;
-  cursor:not-allowed;
-}
+    input, select {
+      width:100%;
+      padding:12px;
+      border-radius:10px;
+      border:1px solid var(--border);
+      background:#020617;
+      color:var(--text);
+      margin-bottom:12px;
+    }
 
-.rowbtn{display:flex;gap:10px;margin-top:12px}
-.rowbtn button{margin-top:0}
-@media(max-width:560px){.rowbtn{flex-direction:column}}
+    button {
+      width:100%;
+      padding:14px;
+      border:none;
+      border-radius:12px;
+      background:var(--accent);
+      color:#052e16;
+      font-weight:700;
+      cursor:pointer;
+      font-size:1rem;
+    }
 
-.result{
-  margin-top:14px;
-  padding:14px;
-  border-radius:16px;
-  background:rgba(2,6,23,.55);
-  border:1px solid rgba(31,41,55,.88);
-  line-height:1.55;
-}
+    button:active {
+      transform: scale(0.98);
+    }
 
-.kpi{
-  display:flex;align-items:center;justify-content:space-between;gap:10px;
-  padding:10px 0;border-bottom:1px solid rgba(31,41,55,.6);
-}
-.kpi:last-child{border-bottom:none}
-.kpi .left{display:flex;align-items:center;gap:10px;min-width:0}
-.icon{
-  width:28px;height:28px;border-radius:10px;
-  display:grid;place-items:center;
-  background:rgba(148,163,184,.10);
-  border:1px solid rgba(148,163,184,.18);
-}
-.icon.good{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.28)}
-.icon.warn{background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.28)}
-.icon.bad{background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.28)}
-.kpi .name{color:var(--text);font-weight:900}
-.kpi .sub{color:var(--muted);font-size:11px;margin-top:2px}
-.kpi .right{font-weight:950;white-space:nowrap}
+    .small {
+      font-size:0.8rem;
+      color:var(--muted);
+      text-align:center;
+      margin-top:10px;
+    }
 
-.tag{
-  display:inline-block;
-  margin-top:10px;
-  padding:7px 10px;
-  border-radius:999px;
-  font-size:11px;
-  font-weight:950;
-  border:1px solid rgba(148,163,184,.18);
-  background:rgba(148,163,184,.10);
-}
-.tag.good{border-color:rgba(34,197,94,.28);background:rgba(34,197,94,.12);color:var(--accent)}
-.tag.warn{border-color:rgba(245,158,11,.28);background:rgba(245,158,11,.12);color:var(--warn)}
-.tag.bad{border-color:rgba(239,68,68,.28);background:rgba(239,68,68,.12);color:var(--bad)}
-
-.history-item{
-  border-bottom:1px solid rgba(31,41,55,.65);
-  padding:10px 0;
-  font-size:12px;
-}
-.history-item:last-child{border-bottom:none}
-.muted{color:var(--muted)}
-small{color:var(--muted)}
-
-.toast{
-  position:fixed;left:50%;bottom:16px;transform:translateX(-50%);
-  background:rgba(2,6,23,.92);
-  border:1px solid rgba(31,41,55,.85);
-  padding:10px 12px;border-radius:14px;
-  color:var(--text);
-  font-size:12px;
-  display:none;
-  max-width:92vw;
-  z-index:999;
-}
-
-/* Modal */
-.modalWrap{
-  position:fixed; inset:0; z-index:1000;
-  background:rgba(0,0,0,.55);
-  display:none;
-  align-items:center; justify-content:center;
-  padding:18px;
-}
-.modal{
-  width:min(520px, 100%);
-  background:rgba(2,6,23,.96);
-  border:1px solid rgba(31,41,55,.88);
-  border-radius:22px;
-  padding:16px;
-  box-shadow:0 24px 70px rgba(0,0,0,.6);
-}
-.modal h2{font-size:16px;font-weight:950}
-.modal .sub{margin-top:6px;color:var(--muted);font-size:12px;line-height:1.35}
-.modal .hr{height:1px;background:rgba(31,41,55,.75);margin:12px 0}
-.modal .x{
-  float:right;
-  background:rgba(148,163,184,.10);
-  border:1px solid rgba(148,163,184,.22);
-  color:var(--text);
-  padding:8px 10px;
-  border-radius:12px;
-  cursor:pointer;
-  font-weight:950;
-}
-
-footer{
-  text-align:center;
-  font-size:11px;
-  color:var(--muted);
-  margin:18px 0 0;
-}
-
-/* Print report */
-@media print{
-  body{background:#fff;color:#000}
-  header, .pill, .rowbtn, .toast, .modalWrap, #proCard, #garageCard, #remindersCard, #historyCard, #tipsCard {display:none!important;}
-  .wrap{max-width:none;padding:0}
-  .card{box-shadow:none;background:#fff;border:1px solid #ddd}
-  .muted{color:#444}
-}
-</style>
+    footer {
+      text-align:center;
+      padding:20px;
+      color:var(--muted);
+      font-size:0.75rem;
+    }
+  </style>
 </head>
 
 <body>
+
 <header>
-  <div class="toprow">
-    <div>
-      <h1>AutoCare+</h1>
-      <p>Entretien intelligent — voiture & moto</p>
-    </div>
-    <button id="proPill" class="pill" onclick="openProModal()">
-      ⭐ <span id="proPillText">Passer Pro</span>
-    </button>
-  </div>
+  <h1>AutoCare+</h1>
+  <p>Suivi intelligent d’entretien — voiture & moto</p>
 </header>
 
-<div class="wrap">
+<main>
 
-  <!-- PRO -->
-  <div class="card" id="proCard">
-    <b style="font-weight:950">AutoCare+ Pro</b>
-    <div class="muted" style="margin-top:6px;font-size:12px">
-      Pro : <b>12 $ / an</b> — Garage illimité, export PDF, sauvegarde/restauration.
-    </div>
-
-    <div class="grid2" style="margin-top:10px">
-      <div>
-        <label>Entrer un code Pro</label>
-        <input id="proCode" type="text" placeholder="ex: AUTOCARE-PRO-0001">
-      </div>
-      <div>
-        <label>&nbsp;</label>
-        <button class="secondary" onclick="activatePro()">Activer Pro</button>
-      </div>
-    </div>
-
-    <div class="rowbtn">
-      <button class="secondary" id="btnBackup" onclick="backupAll()" disabled>⬇️ Backup (JSON)</button>
-      <button class="secondary" id="btnRestore" onclick="triggerRestore()" disabled>⬆️ Restore (JSON)</button>
-      <button class="secondary" id="btnPDF" onclick="printReport()" disabled>🧾 Export PDF</button>
-    </div>
-
-    <input id="restoreFile" type="file" accept="application/json" style="display:none" />
-    <div class="muted" style="margin-top:10px;font-size:12px" id="proStatus">Statut : —</div>
-  </div>
-
-  <!-- GARAGE -->
-  <div class="card" id="garageCard">
-    <b style="font-weight:950">Garage</b>
-    <div class="muted" style="margin-top:6px;font-size:12px">Bascule de véhicule en 1 clic.</div>
-
-    <label>Véhicule actif</label>
-    <select id="garageSelect"></select>
-
-    <div class="rowbtn">
-      <button class="secondary" id="btnAddVeh" onclick="openAdd()">➕ Ajouter un véhicule</button>
-      <button class="secondary" onclick="openEdit()">✏️ Modifier</button>
-      <button class="secondary" onclick="removeVehicle()">🗑️ Supprimer</button>
-    </div>
-
-    <div id="garageForm" style="display:none;margin-top:10px">
-      <div class="grid2">
-        <div>
-          <label>Nom (ex: Clio, MT-07)</label>
-          <input id="vName" type="text" placeholder="Mon véhicule">
-        </div>
-        <div>
-          <label>Type</label>
-          <select id="vType">
-            <option value="car">Voiture</option>
-            <option value="bike">Moto</option>
-          </select>
-        </div>
-      </div>
-
-      <label>Type d’usage</label>
-      <select id="vUsage">
-        <option value="city">Ville</option>
-        <option value="mixed" selected>Mixte</option>
-        <option value="road">Route</option>
-      </select>
-
-      <div class="grid2">
-        <div>
-          <label>Km actuel</label>
-          <input id="vKmNow" type="number" placeholder="ex: 72500">
-        </div>
-        <div>
-          <label>Km / semaine (optionnel)</label>
-          <input id="vKmWeek" type="number" placeholder="ex: 250">
-        </div>
-      </div>
-
-      <div class="grid2">
-        <div>
-          <label>Dernière vidange (km)</label>
-          <input id="vKmOil" type="number" placeholder="ex: 65000">
-        </div>
-        <div>
-          <label>Dernier contrôle freins (km)</label>
-          <input id="vKmBrakes" type="number" placeholder="ex: 60000">
-        </div>
-      </div>
-
-      <label>Dernier contrôle pneus (km)</label>
-      <input id="vKmTires" type="number" placeholder="ex: 58000">
-
-      <div class="rowbtn">
-        <button onclick="saveVehicle()">💾 Enregistrer</button>
-        <button class="secondary" onclick="closeGarageForm()">Annuler</button>
-      </div>
-
-      <div class="help" id="garageHelp"></div>
-    </div>
-  </div>
-
-  <!-- CALCUL -->
+  <!-- Véhicule -->
   <div class="card">
-    <b style="font-weight:950">Entretien</b>
-    <div class="muted" style="margin-top:6px;font-size:12px">Les champs se remplissent depuis le véhicule actif.</div>
+    <h2>🚗 Véhicule</h2>
 
-    <div class="grid2">
-      <div>
-        <label>Type de véhicule</label>
-        <select id="vehicle" disabled>
-          <option value="car">Voiture</option>
-          <option value="bike">Moto</option>
-        </select>
-      </div>
-      <div>
-        <label>Type d’usage</label>
-        <select id="usage" disabled>
-          <option value="city">Ville</option>
-          <option value="mixed" selected>Mixte</option>
-          <option value="road">Route</option>
-        </select>
-      </div>
-    </div>
+    <label>Type</label>
+    <select>
+      <option>Voiture</option>
+      <option>Moto</option>
+    </select>
 
-    <div class="grid2">
-      <div>
-        <label>Kilométrage actuel</label>
-        <input id="kmNow" type="number" placeholder="ex: 72 500">
-      </div>
-      <div>
-        <label>Km / semaine (estimation date)</label>
-        <input id="kmWeek" type="number" placeholder="ex: 250">
-      </div>
-    </div>
+    <label>Marque</label>
+    <input type="text" placeholder="Ex : Toyota, Yamaha">
 
-    <div class="grid2">
-      <div>
-        <label>Dernière vidange (km)</label>
-        <input id="kmOil" type="number" placeholder="ex: 65 000">
-      </div>
-      <div>
-        <label>Dernier contrôle freins (km)</label>
-        <input id="kmBrakes" type="number" placeholder="ex: 60 000">
-      </div>
-    </div>
+    <label>Modèle</label>
+    <input type="text" placeholder="Ex : Corolla, MT-07">
 
-    <label>Dernier contrôle pneus (km)</label>
-    <input id="kmTires" type="number" placeholder="ex: 58 000">
-
-    <div class="help" id="formHelp"></div>
-
-    <button onclick="calculate()">Calculer l’entretien</button>
-
-    <div class="rowbtn">
-      <button class="secondary" onclick="addToHistory()">Ajouter à l’historique</button>
-      <button class="secondary" onclick="downloadICS()">📅 Export calendrier (.ics)</button>
-    </div>
-
-    <div id="output"></div>
+    <label>Kilométrage actuel</label>
+    <input type="number" placeholder="Ex : 125000">
   </div>
 
-  <!-- RAPPELS -->
-  <div class="card" id="remindersCard">
-    <b style="font-weight:950">Rappels (navigateur)</b>
-    <div class="muted" style="margin-top:6px;font-size:12px">
-      Fonctionne si la page est ouverte (ou parfois en arrière-plan selon le navigateur).
-    </div>
+  <!-- Entretien -->
+  <div class="card">
+    <h2>🛠️ Ajouter un entretien</h2>
 
-    <label>Me prévenir quand il reste (km)</label>
-    <div class="grid2">
-      <div>
-        <input id="notifyThreshold" type="number" placeholder="ex: 500">
-        <small>Ex: 500 = alerte quand il reste ≤ 500 km</small>
-      </div>
-      <div>
-        <select id="notifyItems">
-          <option value="all">Tout (vidange + freins + pneus)</option>
-          <option value="oil">Vidange</option>
-          <option value="brakes">Freins</option>
-          <option value="tires">Pneus</option>
-        </select>
-        <small>Choisir un type ou tout</small>
-      </div>
-    </div>
+    <label>Type d’entretien</label>
+    <select>
+      <option>Vidange</option>
+      <option>Freins</option>
+      <option>Filtres</option>
+      <option>Pneus</option>
+      <option>Autre</option>
+    </select>
 
-    <div class="rowbtn">
-      <button class="secondary" onclick="enableNotifications()">🔔 Activer les notifications</button>
-      <button class="secondary" onclick="saveReminderSettings()">💾 Sauver réglages</button>
-    </div>
+    <label>Date</label>
+    <input type="date">
 
-    <div class="muted" style="margin-top:10px;font-size:12px" id="notifStatus">Statut : —</div>
+    <label>Kilométrage</label>
+    <input type="number">
+
+    <button>Enregistrer</button>
+    <div class="small">Historique sauvegardé localement</div>
   </div>
 
-  <!-- HISTORIQUE -->
-  <div class="card" id="historyCard">
-    <b style="font-weight:950">Historique</b>
-    <div id="history" style="margin-top:10px"></div>
+  <!-- Pro -->
+  <div class="card">
+    <h2>⭐ AutoCare+ Pro</h2>
+    <p style="color:var(--muted); font-size:0.9rem; margin-bottom:12px;">
+      Garage illimité · Export PDF · Sauvegarde & restauration
+    </p>
+
+    <button onclick="alert('Accès Pro bientôt activé 🔒')">
+      Passer en Pro
+    </button>
   </div>
 
-  <div class="card" id="tipsCard">
-    <b style="font-weight:950">Astuce</b>
-    <div class="muted" style="margin-top:6px;font-size:12px;line-height:1.5">
-      Free = 1 véhicule. Pro = illimité + export PDF + backup/restore.  
-      Le “PDF” se fait via “Imprimer” → “Enregistrer en PDF”.
-    </div>
-  </div>
+</main>
 
-  <footer>
-    © 2025 AutoCare+ — Première publication publique : Décembre 2025<br>
-    Données indicatives • Aucun compte requis
-  </footer>
-</div>
+<footer>
+  AutoCare+ © 2025 — Nouvelle-Calédonie
+</footer>
 
-<div class="toast" id="toast"></div>
-
-<!-- PRO MODAL -->
-<div class="modalWrap" id="proModal">
-  <div class="modal">
-    <button class="x" onclick="closeProModal()">✕</button>
-    <h2>AutoCare+ Pro</h2>
-    <div class="sub">
-      <b>12 $ / an</b><br>
-      ✅ Garage illimité<br>
-      ✅ Export PDF (revente véhicule)<br>
-      ✅ Backup/Restore (fichier JSON)<br><br>
-      Tu actives Pro en entrant un <b>code</b>.
-    </div>
-    <div class="hr"></div>
-    <label>Code Pro</label>
-    <input id="proCodeModal" type="text" placeholder="ex: AUTOCARE-PRO-0001">
-    <div class="rowbtn">
-      <button class="secondary" onclick="activatePro(true)">Activer</button>
-      <button class="secondary" onclick="closeProModal()">Fermer</button>
-    </div>
-    <div class="sub" id="proModalMsg" style="margin-top:10px"></div>
-  </div>
-</div>
-
+<!-- Service Worker -->
 <script>
-/* -------------------------
-  Storage keys
-------------------------- */
-const KEY_GARAGE = "autocare_garage_v2";
-const KEY_ACTIVE = "autocare_active_vehicle_v2";
-const KEY_HISTORY = "autocare_history_v3";
-const KEY_REMIND = "autocare_reminders_v2";
-const KEY_NOTIFIED = "autocare_notified_v2";
-const KEY_PRO = "autocare_pro_v1";
-
-/* -------------------------
-  PRO codes (SHA-256 hashes)
-  Codes réels (à vendre) ne sont PAS visibles ici.
-------------------------- */
-const PRO_CODE_HASHES = new Set([
-  "a7de37897329a208a9530a9a9bba469dec659ea6febc5c5acf9b6a61e5b99f81",
-  "72f2d82cb8015bc163d49809491ee353b8075681d63047d03f3a3af6fd4c1a68",
-  "f6338e40c6975b13d8b3d82b77af2daec6260d61bcb6d9733c6afa0651a81a87",
-  "3b5a9a1d0b9c1de3c0e5a46989f2ed39d0e7bb97a78c6d41b57b153cd28d8369",
-  "bd5a8da07b650b08dfe78ce2f52d3b10a8a7f1405d09cf7c7f6dfb6c3e3a37bb",
-  "fd9d6cc6d8c1b407aa6c1f2c3c03e5dfefb3dfcf4e641f0f3d91d1b0bbf88812",
-  "dc1762e6f3ac3d967fdf1dc03cfefb6407b3e70d4d8c3b1e09c46db62d8b0cb4",
-  "c7e820f4fb9b169eae6df0c3adf6c5ad3c6f64b1f0f5a7e9c6d5b7b9c8b3d2b1",
-  "3c78baf0d50df7f0d2f2b3ef8aebc6c0f5c7a1ed3b9aa9a9a3a1c4f79c8b8a57",
-  "0f2b7e3d9a8f2f5a8f8d32c7a2b1c9b8a9b9c9d4e6f1a2b3c4d5e6f7a8b9c0d1",
-  "9b4d8f8e5a0d0b9c8c7d6e5f4a3b2c1d0e9f8a7b6c5d4e3f2a1b0c9d8e7f6a5",
-  "8f6a5b4c3d2e1f0a9b8c7d6e5f4a3b2c1d0e9f8a7b6c5d4e3f2a1b0c9d8e7f6",
-  "b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3",
-  "c3b2a1f0e9d8c7b6a5f4e3d2c1b0a9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2",
-  "4b8c3f0a9d2e7c1b6f5a0e9d8c7b6a5f4e3d2c1b0a9f8e7d6c5b4a3f2e1d0c9b",
-  "5c9d4e1b0f2a8d3c7b6a5f4e3d2c1b0a9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4",
-  "6d0e5f2c1b3a9e4d8c7b6a5f4e3d2c1b0a9f8e7d6c5b4a3f2e1d0c9b8a7f6e5",
-  "7e1f603d2c4b0a5e9d8c7b6a5f4e3d2c1b0a9f8e7d6c5b4a3f2e1d0c9b8a7f6",
-  "8f2a714e3d5c1b6f0a9e8d7c6b5a4f3e2d1c0b9a8f7e6d5c4b3a2f1e0d9c8b7",
-  "9a3b825f4e6d2c701b0f9e8d7c6b5a4f3e2d1c0b9a8f7e6d5c4b3a2f1e0d9c8"
-]);
-// NOTE: tu peux remplacer ces hashes par les tiens plus tard.
-
-/* -------------------------
-  Helpers
-------------------------- */
-const $ = (id)=>document.getElementById(id);
-const fmt = (n)=>Number(n).toLocaleString("fr-FR");
-const clampInt = (v)=> {
-  const n = Math.floor(Number(v));
-  return Number.isFinite(n) ? n : 0;
-};
-function toast(msg){
-  const t = $("toast");
-  t.textContent = msg;
-  t.style.display = "block";
-  clearTimeout(window.__toastT);
-  window.__toastT = setTimeout(()=> t.style.display="none", 1800);
-}
-function escapeHtml(s){
-  return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
-}
-
-/* -------------------------
-  PRO state
-------------------------- */
-function isPro(){
-  try{ return JSON.parse(localStorage.getItem(KEY_PRO) || "{}").active === true; }
-  catch(e){ return false; }
-}
-function setPro(active, meta={}){
-  localStorage.setItem(KEY_PRO, JSON.stringify({active, ...meta, at: Date.now()}));
-  refreshProUI();
-}
-function openProModal(){ $("proModal").style.display="flex"; $("proModalMsg").textContent=""; }
-function closeProModal(){ $("proModal").style.display="none"; }
-
-async function sha256Hex(str){
-  const enc = new TextEncoder().encode(str.trim());
-  const buf = await crypto.subtle.digest("SHA-256", enc);
-  return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,"0")).join("");
-}
-
-async function activatePro(fromModal=false){
-  const code = (fromModal ? $("proCodeModal").value : $("proCode").value).trim();
-  if(!code){
-    const msg = "Entre un code Pro.";
-    if(fromModal) $("proModalMsg").textContent = "⚠️ " + msg;
-    else toast(msg);
-    return;
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./sw.js");
+    });
   }
-  const h = await sha256Hex(code);
-  if(PRO_CODE_HASHES.has(h)){
-    setPro(true, {hash:h});
-    toast("Pro activé ✅");
-    if(fromModal) closeProModal();
-  }else{
-    const msg = "Code invalide.";
-    if(fromModal) $("proModalMsg").textContent = "❌ " + msg;
-    else toast(msg);
-  }
-}
-
-/* -------------------------
-  Storage
-------------------------- */
-function getGarage(){ try{ return JSON.parse(localStorage.getItem(KEY_GARAGE) || "[]"); } catch(e){ return []; } }
-function setGarage(arr){ localStorage.setItem(KEY_GARAGE, JSON.stringify(arr)); }
-function getActiveId(){ return localStorage.getItem(KEY_ACTIVE) || ""; }
-function setActiveId(id){ localStorage.setItem(KEY_ACTIVE, id); }
-
-function getHistory(){ try{ return JSON.parse(localStorage.getItem(KEY_HISTORY) || "[]"); } catch(e){ return []; } }
-function setHistory(arr){ localStorage.setItem(KEY_HISTORY, JSON.stringify(arr)); }
-
-function getRemind(){ try{ return JSON.parse(localStorage.getItem(KEY_REMIND) || "{}"); } catch(e){ return {}; } }
-function setRemind(obj){ localStorage.setItem(KEY_REMIND, JSON.stringify(obj)); }
-
-function getNotifiedMap(){ try{ return JSON.parse(localStorage.getItem(KEY_NOTIFIED) || "{}"); } catch(e){ return {}; } }
-function setNotifiedMap(m){ localStorage.setItem(KEY_NOTIFIED, JSON.stringify(m)); }
-
-function uid(){
-  return (crypto?.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2));
-}
-
-/* -------------------------
-  Logic
-------------------------- */
-function factorUsage(u){ if(u==="city") return 0.8; if(u==="road") return 1.2; return 1; }
-function base(vehicle){
-  if(vehicle==="bike"){ return {oil:6000, brakes:8000, tires:7000}; }
-  return {oil:10000, brakes:12000, tires:10000};
-}
-function tagForRemaining(rem){
-  if(rem <= 0) return {cls:"bad", txt:"Urgent"};
-  if(rem <= 500) return {cls:"warn", txt:"Bientôt"};
-  return {cls:"good", txt:"OK"};
-}
-function usageLabel(u){ if(u==="city") return "Ville"; if(u==="road") return "Route"; return "Mixte"; }
-
-function clearErrors(){
-  ["kmNow","kmOil","kmBrakes","kmTires","kmWeek"].forEach(id=>$(id).classList.remove("input-error"));
-  $("formHelp").style.display="none";
-  $("formHelp").textContent="";
-}
-function showFormError(message, fields=[]){
-  fields.forEach(id=>$(id).classList.add("input-error"));
-  $("formHelp").style.display="block";
-  $("formHelp").textContent = "⚠️ " + message;
-}
-
-/* -------------------------
-  Garage UI
-------------------------- */
-let garageMode = "add";
-
-function ensureDefaultGarage(){
-  const g = getGarage();
-  if(g.length) return;
-  const def = { id: uid(), name:"Mon véhicule", type:"car", usage:"mixed", kmNow:0, kmWeek:0, kmOil:0, kmBrakes:0, kmTires:0 };
-  setGarage([def]);
-  setActiveId(def.id);
-}
-
-function renderGarageSelect(){
-  const g = getGarage();
-  const active = getActiveId();
-  const sel = $("garageSelect");
-  sel.innerHTML = g.map(v=>{
-    const is = v.id === active ? "selected" : "";
-    const badge = v.type === "bike" ? "🏍️" : "🚗";
-    return `<option value="${v.id}" ${is}>${badge} ${escapeHtml(v.name)}</option>`;
-  }).join("");
-}
-
-function loadActiveVehicleToForm(){
-  const g = getGarage();
-  const active = getActiveId();
-  const v = g.find(x=>x.id===active) || g[0];
-  if(!v) return;
-
-  $("vehicle").value = v.type;
-  $("usage").value = v.usage;
-
-  $("kmNow").value = v.kmNow || "";
-  $("kmWeek").value = v.kmWeek || "";
-  $("kmOil").value = v.kmOil || "";
-  $("kmBrakes").value = v.kmBrakes || "";
-  $("kmTires").value = v.kmTires || "";
-
-  $("output").innerHTML = "";
-  window.__lastCalc = null;
-}
-
-$("garageSelect").addEventListener("change", ()=>{
-  setActiveId($("garageSelect").value);
-  loadActiveVehicleToForm();
-  toast("Véhicule changé");
-});
-
-function openAdd(){
-  const g = getGarage();
-  if(!isPro() && g.length >= 1){
-    openProModal();
-    $("proModalMsg").textContent = "⭐ Free = 1 véhicule. Pro = garage illimité.";
-    return;
-  }
-  garageMode="add";
-  $("garageForm").style.display="block";
-  $("garageHelp").style.display="none";
-  $("garageHelp").textContent="";
-  $("vName").value="";
-  $("vType").value="car";
-  $("vUsage").value="mixed";
-  $("vKmNow").value="";
-  $("vKmWeek").value="";
-  $("vKmOil").value="";
-  $("vKmBrakes").value="";
-  $("vKmTires").value="";
-}
-
-function openEdit(){
-  const g = getGarage();
-  const v = g.find(x=>x.id===getActiveId());
-  if(!v){ toast("Aucun véhicule"); return; }
-  garageMode="edit";
-  $("garageForm").style.display="block";
-  $("garageHelp").style.display="none";
-  $("garageHelp").textContent="";
-  $("vName").value=v.name || "";
-  $("vType").value=v.type || "car";
-  $("vUsage").value=v.usage || "mixed";
-  $("vKmNow").value=v.kmNow || "";
-  $("vKmWeek").value=v.kmWeek || "";
-  $("vKmOil").value=v.kmOil || "";
-  $("vKmBrakes").value=v.kmBrakes || "";
-  $("vKmTires").value=v.kmTires || "";
-}
-
-function closeGarageForm(){ $("garageForm").style.display="none"; }
-
-function garageError(msg){
-  $("garageHelp").style.display="block";
-  $("garageHelp").textContent="⚠️ " + msg;
-}
-
-function saveVehicle(){
-  const name = ($("vName").value || "").trim();
-  const type = $("vType").value;
-  const usage = $("vUsage").value;
-  const kmNow = clampInt($("vKmNow").value);
-  const kmWeek = clampInt($("vKmWeek").value);
-  const kmOil = clampInt($("vKmOil").value);
-  const kmBrakes = clampInt($("vKmBrakes").value);
-  const kmTires = clampInt($("vKmTires").value);
-
-  if(!name){ garageError("Donne un nom au véhicule."); return; }
-  if(kmOil && kmOil > kmNow){ garageError("Dernière vidange > km actuel."); return; }
-  if(kmBrakes && kmBrakes > kmNow){ garageError("Freins > km actuel."); return; }
-  if(kmTires && kmTires > kmNow){ garageError("Pneus > km actuel."); return; }
-
-  const g = getGarage();
-
-  if(garageMode==="add"){
-    const v = {id:uid(), name, type, usage, kmNow, kmWeek, kmOil, kmBrakes, kmTires};
-    g.unshift(v);
-    setGarage(g);
-    setActiveId(v.id);
-    renderGarageSelect();
-    loadActiveVehicleToForm();
-    closeGarageForm();
-    toast("Véhicule ajouté ✅");
-    return;
-  }
-
-  const active = getActiveId();
-  const idx = g.findIndex(x=>x.id===active);
-  if(idx<0){ garageError("Impossible de modifier."); return; }
-  g[idx] = {...g[idx], name, type, usage, kmNow, kmWeek, kmOil, kmBrakes, kmTires};
-  setGarage(g);
-  renderGarageSelect();
-  loadActiveVehicleToForm();
-  closeGarageForm();
-  toast("Véhicule modifié ✅");
-}
-
-function removeVehicle(){
-  const g = getGarage();
-  if(g.length <= 1){ alert("Garde au moins 1 véhicule."); return; }
-  if(!confirm("Supprimer ce véhicule ?")) return;
-  const active = getActiveId();
-  const ng = g.filter(x=>x.id!==active);
-  setGarage(ng);
-  setActiveId(ng[0].id);
-  renderGarageSelect();
-  loadActiveVehicleToForm();
-  toast("Supprimé");
-}
-
-/* Sync main form to active vehicle */
-function syncFormToGarage(){
-  const g = getGarage();
-  const active = getActiveId();
-  const idx = g.findIndex(x=>x.id===active);
-  if(idx<0) return;
-  g[idx] = {
-    ...g[idx],
-    kmNow: clampInt($("kmNow").value),
-    kmWeek: clampInt($("kmWeek").value),
-    kmOil: clampInt($("kmOil").value),
-    kmBrakes: clampInt($("kmBrakes").value),
-    kmTires: clampInt($("kmTires").value),
-  };
-  setGarage(g);
-}
-
-/* -------------------------
-  Calculate
-------------------------- */
-function calculate(){
-  clearErrors();
-
-  const g = getGarage();
-  const vObj = g.find(x=>x.id===getActiveId());
-  if(!vObj){ showFormError("Aucun véhicule actif.", []); return; }
-
-  const type = vObj.type;
-  const usage = vObj.usage;
-
-  const kmNow = clampInt($("kmNow").value);
-  const kmWeek = clampInt($("kmWeek").value);
-  const kmOil = clampInt($("kmOil").value);
-  const kmBrakes = clampInt($("kmBrakes").value);
-  const kmTires = clampInt($("kmTires").value);
-
-  if(!kmNow){
-    showFormError("Entre le kilométrage actuel.", ["kmNow"]);
-    return;
-  }
-  if(kmOil && kmOil > kmNow){
-    showFormError("La dernière vidange ne peut pas dépasser le km actuel.", ["kmOil","kmNow"]);
-    return;
-  }
-  if(kmBrakes && kmBrakes > kmNow){
-    showFormError("Le dernier contrôle freins ne peut pas dépasser le km actuel.", ["kmBrakes","kmNow"]);
-    return;
-  }
-  if(kmTires && kmTires > kmNow){
-    showFormError("Le dernier contrôle pneus ne peut pas dépasser le km actuel.", ["kmTires","kmNow"]);
-    return;
-  }
-
-  const f = factorUsage(usage);
-  const b = base(type);
-
-  const oilInterval = Math.round(b.oil * f);
-  const brInterval  = Math.round(b.brakes * f);
-  const tiInterval  = Math.round(b.tires * f);
-
-  const oilNext = (kmOil || kmNow) + oilInterval;
-  const brNext  = (kmBrakes || kmNow) + brInterval;
-  const tiNext  = (kmTires || kmNow) + tiInterval;
-
-  const remOil = oilNext - kmNow;
-  const remBr  = brNext  - kmNow;
-  const remTi  = tiNext  - kmNow;
-
-  const tOil = tagForRemaining(remOil);
-  const tBr  = tagForRemaining(remBr);
-  const tTi  = tagForRemaining(remTi);
-
-  window.__lastCalc = {
-    at: Date.now(),
-    vehicleId: vObj.id,
-    name: vObj.name,
-    type, usage,
-    kmNow, kmWeek,
-    kmOil, kmBrakes, kmTires,
-    oilNext, brNext, tiNext,
-    remOil, remBr, remTi
-  };
-
-  $("output").innerHTML = `
-    <div class="result">
-      <div class="kpi">
-        <div class="left">
-          <div class="icon ${tOil.cls}">🛢️</div>
-          <div style="min-width:0">
-            <div class="name">Vidange</div>
-            <div class="sub">Reste ~ ${fmt(remOil)} km • Intervalle ${fmt(oilInterval)} km</div>
-          </div>
-        </div>
-        <div class="right">${fmt(oilNext)} km</div>
-      </div>
-
-      <div class="kpi">
-        <div class="left">
-          <div class="icon ${tBr.cls}">🛑</div>
-          <div style="min-width:0">
-            <div class="name">Freins (contrôle)</div>
-            <div class="sub">Reste ~ ${fmt(remBr)} km • Intervalle ${fmt(brInterval)} km</div>
-          </div>
-        </div>
-        <div class="right">${fmt(brNext)} km</div>
-      </div>
-
-      <div class="kpi">
-        <div class="left">
-          <div class="icon ${tTi.cls}">🛞</div>
-          <div style="min-width:0">
-            <div class="name">Pneus (contrôle)</div>
-            <div class="sub">Reste ~ ${fmt(remTi)} km • Intervalle ${fmt(tiInterval)} km</div>
-          </div>
-        </div>
-        <div class="right">${fmt(tiNext)} km</div>
-      </div>
-
-      <span class="tag ${tOil.cls}">Vidange : ${tOil.txt}</span>
-      <span class="tag ${tBr.cls}" style="margin-left:8px">Freins : ${tBr.txt}</span>
-      <span class="tag ${tTi.cls}" style="margin-left:8px">Pneus : ${tTi.txt}</span>
-
-      <div class="muted" style="margin-top:10px;font-size:11px">
-        Véhicule : <b>${escapeHtml(vObj.name)}</b> • ${type==="bike"?"Moto":"Voiture"} • ${usageLabel(usage)}
-      </div>
-    </div>
-  `;
-
-  syncFormToGarage();
-  toast("Calcul OK ✅");
-  checkAndNotify();
-}
-
-/* -------------------------
-  History
-------------------------- */
-function addToHistory(){
-  if(!window.__lastCalc){ alert("Fais un calcul avant."); return; }
-  const h = getHistory();
-  h.unshift(window.__lastCalc);
-  setHistory(h.slice(0,80));
-  renderHistory();
-  toast("Ajouté à l’historique ✅");
-}
-function renderHistory(){
-  const h = getHistory();
-  const box = $("history");
-  if(!h.length){
-    box.innerHTML = "<div class='muted' style='margin-top:10px;font-size:12px'>Aucun historique pour l’instant.</div>";
-    return;
-  }
-  box.innerHTML = h.map(e=>{
-    const who = e.type==="bike" ? "Moto" : "Voiture";
-    const use = usageLabel(e.usage);
-    return `
-      <div class="history-item">
-        <b>${new Date(e.at).toLocaleString("fr-FR")}</b><br>
-        <span class="muted">${escapeHtml(e.name)} • ${who} • ${use} • km: ${fmt(e.kmNow)}</span><br>
-        🛢️ Vidange: <b>${fmt(e.oilNext)} km</b> •
-        🛑 Freins: <b>${fmt(e.brNext)} km</b> •
-        🛞 Pneus: <b>${fmt(e.tiNext)} km</b>
-      </div>
-    `;
-  }).join("");
-}
-
-/* -------------------------
-  Notifications
-------------------------- */
-function updateNotifStatus(){
-  const p = ("Notification" in window) ? Notification.permission : "unsupported";
-  $("notifStatus").textContent = ("Notification" in window)
-    ? `Statut : ${p}`
-    : "Statut : notifications non supportées sur ce navigateur";
-}
-updateNotifStatus();
-
-function enableNotifications(){
-  if(!("Notification" in window)){
-    alert("Notifications non supportées sur ce navigateur.");
-    return;
-  }
-  Notification.requestPermission().then(()=>{
-    updateNotifStatus();
-    toast("Permission notifications mise à jour");
-    checkAndNotify();
-  });
-}
-function saveReminderSettings(){
-  const threshold = clampInt($("notifyThreshold").value);
-  const items = $("notifyItems").value;
-  if(!threshold){
-    alert("Entre un seuil (ex: 500).");
-    return;
-  }
-  setRemind({threshold, items});
-  toast("Réglages rappels sauvegardés 💾");
-  checkAndNotify();
-}
-function notify(title, body){
-  try{
-    if(Notification.permission !== "granted") return;
-    new Notification(title, { body });
-  }catch(e){}
-}
-function checkAndNotify(){
-  const r = getRemind();
-  if(!r.threshold) return;
-  if(!window.__lastCalc) return;
-  if(!("Notification" in window) || Notification.permission !== "granted") return;
-
-  const d = window.__lastCalc;
-  const th = r.threshold;
-  const items = r.items || "all";
-
-  const map = getNotifiedMap();
-  const vid = d.vehicleId;
-
-  function maybe(key, label, remaining, targetKm){
-    if(items !== "all" && items !== key) return;
-    if(remaining > th) return;
-    const mapKey = `${vid}:${key}`;
-    if(map[mapKey] === targetKm) return;
-    notify(`AutoCare+ — ${label}`, `${d.name} : il reste ~ ${fmt(remaining)} km (objectif ${fmt(targetKm)} km)`);
-    map[mapKey] = targetKm;
-  }
-
-  maybe("oil","Vidange", d.remOil, d.oilNext);
-  maybe("brakes","Freins", d.remBr, d.brNext);
-  maybe("tires","Pneus", d.remTi, d.tiNext);
-
-  setNotifiedMap(map);
-}
-setInterval(checkAndNotify, 60*1000);
-
-/* -------------------------
-  Calendar export (.ics)
-------------------------- */
-function daysFromKm(remainingKm, kmWeek){
-  if(!kmWeek || kmWeek <= 0) return null;
-  const kmPerDay = kmWeek / 7;
-  if(kmPerDay <= 0) return null;
-  return Math.max(0, Math.round(remainingKm / kmPerDay));
-}
-function ymd(date){
-  const y = date.getFullYear();
-  const m = String(date.getMonth()+1).padStart(2,"0");
-  const d = String(date.getDate()).padStart(2,"0");
-  return `${y}${m}${d}`;
-}
-function downloadText(filename, content){
-  const blob = new Blob([content], {type:"text/calendar;charset=utf-8"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
-}
-function makeICS(title, date){
-  const dt = ymd(date);
-  const uidv = uid();
-  return [
-    "BEGIN:VCALENDAR",
-    "VERSION:2.0",
-    "PRODID:-//AutoCare+//FR",
-    "CALSCALE:GREGORIAN",
-    "BEGIN:VEVENT",
-    `UID:${uidv}`,
-    `DTSTAMP:${dt}T000000Z`,
-    `DTSTART;VALUE=DATE:${dt}`,
-    `DTEND;VALUE=DATE:${dt}`,
-    `SUMMARY:${title}`,
-    "END:VEVENT",
-    "END:VCALENDAR"
-  ].join("\n");
-}
-function downloadICS(){
-  if(!window.__lastCalc){
-    alert("Fais un calcul avant d’exporter le calendrier.");
-    return;
-  }
-  const d = window.__lastCalc;
-  const kmWeek = clampInt($("kmWeek").value);
-
-  const daysOil = daysFromKm(d.remOil, kmWeek);
-  const daysBr  = daysFromKm(d.remBr, kmWeek);
-  const daysTi  = daysFromKm(d.remTi, kmWeek);
-
-  const now = new Date();
-  const dateOil = new Date(now); dateOil.setDate(now.getDate() + (daysOil ?? 0));
-  const dateBr  = new Date(now); dateBr.setDate(now.getDate() + (daysBr  ?? 0));
-  const dateTi  = new Date(now); dateTi.setDate(now.getDate() + (daysTi  ?? 0));
-
-  const safeName = (d.name || "vehicule").toLowerCase().replace(/[^a-z0-9]+/g,"-").slice(0,30) || "vehicule";
-  const ics =
-    makeICS(`AutoCare+ • ${d.name} • Vidange (≈ ${fmt(d.oilNext)} km)`, dateOil) + "\n" +
-    makeICS(`AutoCare+ • ${d.name} • Freins (≈ ${fmt(d.brNext)} km)`, dateBr) + "\n" +
-    makeICS(`AutoCare+ • ${d.name} • Pneus (≈ ${fmt(d.tiNext)} km)`, dateTi);
-
-  downloadText(`autocare-${safeName}.ics`, ics);
-  toast("Calendrier exporté 📅");
-}
-
-/* -------------------------
-  PRO features: Backup/Restore + PDF
-------------------------- */
-function refreshProUI(){
-  const pro = isPro();
-  const pill = $("proPill");
-  const pillText = $("proPillText");
-  const status = $("proStatus");
-
-  if(pro){
-    pill.classList.add("pro");
-    pillText.textContent = "Pro activé";
-    status.textContent = "Statut : ✅ Pro activé";
-    $("btnBackup").disabled = false;
-    $("btnRestore").disabled = false;
-    $("btnPDF").disabled = false;
-    $("btnAddVeh").textContent = "➕ Ajouter un véhicule (illimité)";
-  }else{
-    pill.classList.remove("pro");
-    pillText.textContent = "Passer Pro";
-    status.textContent = "Statut : Free (1 véhicule)";
-    $("btnBackup").disabled = true;
-    $("btnRestore").disabled = true;
-    $("btnPDF").disabled = true;
-    $("btnAddVeh").textContent = "➕ Ajouter un véhicule (Free = 1)";
-  }
-}
-
-function backupAll(){
-  if(!isPro()){ openProModal(); return; }
-  const payload = {
-    v: 1,
-    garage: getGarage(),
-    active: getActiveId(),
-    history: getHistory(),
-    remind: getRemind(),
-    pro: JSON.parse(localStorage.getItem(KEY_PRO) || "{}")
-  };
-  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json;charset=utf-8"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "autocare-backup.json";
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
-  toast("Backup téléchargé ✅");
-}
-
-function triggerRestore(){
-  if(!isPro()){ openProModal(); return; }
-  $("restoreFile").click();
-}
-$("restoreFile").addEventListener("change", async (e)=>{
-  const f = e.target.files?.[0];
-  if(!f) return;
-  try{
-    const text = await f.text();
-    const data = JSON.parse(text);
-    if(!data || !Array.isArray(data.garage)) throw new Error("Format invalide");
-
-    localStorage.setItem(KEY_GARAGE, JSON.stringify(data.garage));
-    localStorage.setItem(KEY_ACTIVE, String(data.active || ""));
-    localStorage.setItem(KEY_HISTORY, JSON.stringify(data.history || []));
-    localStorage.setItem(KEY_REMIND, JSON.stringify(data.remind || {}));
-    if(data.pro?.active) localStorage.setItem(KEY_PRO, JSON.stringify(data.pro));
-
-    init(); // refresh
-    toast("Restore OK ✅");
-  }catch(err){
-    alert("Restore impossible : fichier invalide.");
-  }finally{
-    e.target.value = "";
-  }
-});
-
-function printReport(){
-  if(!isPro()){ openProModal(); return; }
-  if(!window.__lastCalc){
-    alert("Fais un calcul avant d’exporter en PDF.");
-    return;
-  }
-  // Le PDF = impression -> enregistrer en PDF
-  window.print();
-}
-
-/* -------------------------
-  Init
-------------------------- */
-(function init(){
-  ensureDefaultGarage();
-  const g = getGarage();
-  if(!getActiveId() && g[0]) setActiveId(g[0].id);
-  renderGarageSelect();
-  loadActiveVehicleToForm();
-  renderHistory();
-
-  const r = getRemind();
-  if(r.threshold) $("notifyThreshold").value = r.threshold;
-  if(r.items) $("notifyItems").value = r.items;
-
-  updateNotifStatus();
-  refreshProUI();
-})();
 </script>
 
 </body>
