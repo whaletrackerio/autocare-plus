@@ -14,70 +14,210 @@
   --text:#e5e7eb;
   --muted:#9ca3af;
   --accent:#22c55e;
+  --accent2:#a855f7;
   --warn:#f59e0b;
   --bad:#ef4444;
   --radius:18px;
+  --shadow:0 18px 45px rgba(0,0,0,.55);
 }
+
 *{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+
 body{
   font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-  background:linear-gradient(180deg,#020617,var(--bg));
   color:var(--text);
+  background:
+    radial-gradient(900px 520px at 20% -10%, rgba(34,197,94,.20), transparent 60%),
+    radial-gradient(800px 520px at 85% 0%, rgba(168,85,247,.20), transparent 60%),
+    linear-gradient(180deg,#020617,var(--bg));
+  overflow-x:hidden;
 }
+
+/* ✅ Décor latéral */
+body::before,
+body::after{
+  content:"";
+  position:fixed;
+  top:0;
+  bottom:0;
+  width:320px;
+  opacity:.18;
+  pointer-events:none;
+  z-index:0;
+  filter: blur(.2px);
+}
+
+/* Voiture à gauche */
+body::before{
+  left:0;
+  background:
+    url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 600'>\
+<defs>\
+  <linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>\
+    <stop offset='0' stop-color='%2322c55e'/>\
+    <stop offset='1' stop-color='%2316a34a'/>\
+  </linearGradient>\
+</defs>\
+<path fill='url(%23g)' d='M120 355h360l-28 86H148z' opacity='.9'/>\
+<path fill='url(%23g)' d='M185 250h230l60 105H125z' opacity='.85'/>\
+<path fill='%23ffffff' d='M230 270h140l24 44H206z' opacity='.12'/>\
+<circle cx='210' cy='440' r='36' fill='url(%23g)'/>\
+<circle cx='390' cy='440' r='36' fill='url(%23g)'/>\
+<circle cx='210' cy='440' r='16' fill='%23020617' opacity='.7'/>\
+<circle cx='390' cy='440' r='16' fill='%23020617' opacity='.7'/>\
+</svg>")
+    center no-repeat;
+  background-size:270px;
+}
+
+/* Moto à droite */
+body::after{
+  right:0;
+  background:
+    url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 600'>\
+<defs>\
+  <linearGradient id='m' x1='0' y1='0' x2='1' y2='1'>\
+    <stop offset='0' stop-color='%23a855f7'/>\
+    <stop offset='1' stop-color='%23ec4899'/>\
+  </linearGradient>\
+</defs>\
+<circle cx='200' cy='390' r='74' fill='url(%23m)' opacity='.92'/>\
+<circle cx='420' cy='390' r='74' fill='url(%23m)' opacity='.92'/>\
+<circle cx='200' cy='390' r='34' fill='%23020617' opacity='.7'/>\
+<circle cx='420' cy='390' r='34' fill='%23020617' opacity='.7'/>\
+<path fill='url(%23m)' d='M200 390 L295 290 L420 390 Z' opacity='.9'/>\
+<rect x='282' y='250' width='46' height='95' rx='10' fill='url(%23m)' opacity='.9'/>\
+<path fill='%23ffffff' d='M320 260h60l-14 18h-46z' opacity='.10'/>\
+</svg>")
+    center no-repeat;
+  background-size:270px;
+}
+
+/* Cache sur mobile */
+@media(max-width:900px){
+  body::before, body::after{display:none;}
+}
+
+/* Header sticky */
 header{
   position:sticky;top:0;z-index:10;
-  background:rgba(2,6,23,.85);
-  backdrop-filter:blur(10px);
-  border-bottom:1px solid var(--border);
-  padding:14px;
+  background:rgba(2,6,23,.80);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid rgba(31,41,55,.85);
+  padding:14px 14px 12px;
 }
-header h1{font-size:22px;font-weight:900}
-header p{font-size:12px;color:var(--muted)}
-.wrap{max-width:520px;margin:0 auto;padding:16px}
+header h1{
+  font-size:22px;
+  font-weight:950;
+  letter-spacing:.2px;
+}
+header p{
+  font-size:12px;
+  color:var(--muted);
+  margin-top:4px;
+}
+
+/* Contenu au-dessus du décor */
+.wrap{position:relative;z-index:1;max-width:560px;margin:0 auto;padding:16px 14px 70px}
+
 .card{
-  background:rgba(15,23,42,.9);
-  border:1px solid var(--border);
+  background:rgba(15,23,42,.88);
+  border:1px solid rgba(31,41,55,.92);
   border-radius:var(--radius);
   padding:16px;
   margin-bottom:16px;
+  box-shadow:var(--shadow);
 }
+
 label{font-size:12px;color:var(--muted);display:block;margin-top:12px}
 input,select{
   width:100%;margin-top:6px;padding:12px;
-  border-radius:12px;border:1px solid var(--border);
+  border-radius:12px;border:1px solid rgba(31,41,55,.95);
   background:#020617;color:var(--text);
+  outline:none;
 }
+input:focus,select:focus{
+  border-color:rgba(34,197,94,.6);
+  box-shadow:0 0 0 3px rgba(34,197,94,.12);
+}
+
 button{
   width:100%;margin-top:16px;padding:14px;
   border-radius:999px;border:none;
   background:linear-gradient(120deg,#22c55e,#16a34a);
-  color:#022c22;font-weight:900;cursor:pointer;
+  color:#022c22;font-weight:950;cursor:pointer;
 }
 button.secondary{
-  background:rgba(148,163,184,.12);
+  background:rgba(148,163,184,.10);
   color:var(--text);
-  border:1px solid rgba(148,163,184,.25);
+  border:1px solid rgba(148,163,184,.22);
 }
+
 .result{
-  margin-top:12px;
-  padding:12px;
-  border-radius:14px;
-  background:#020617;
-  border:1px solid var(--border);
+  margin-top:14px;
+  padding:14px;
+  border-radius:16px;
+  background:rgba(2,6,23,.55);
+  border:1px solid rgba(31,41,55,.88);
+  line-height:1.55;
 }
-.bad{color:var(--bad)}
-.warn{color:var(--warn)}
-.good{color:var(--accent)}
+
+.kpi{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:10px 0;
+  border-bottom:1px solid rgba(31,41,55,.6);
+}
+.kpi:last-child{border-bottom:none}
+.kpi .left{
+  display:flex;align-items:center;gap:10px;min-width:0;
+}
+.icon{
+  width:28px;height:28px;border-radius:10px;
+  display:grid;place-items:center;
+  background:rgba(148,163,184,.10);
+  border:1px solid rgba(148,163,184,.18);
+}
+.icon.good{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.28)}
+.icon.warn{background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.28)}
+.icon.bad{background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.28)}
+.kpi b{font-weight:950}
+.kpi .name{color:var(--text);font-weight:900}
+.kpi .sub{color:var(--muted);font-size:11px;margin-top:2px}
+.kpi .right{font-weight:950;white-space:nowrap}
+
+.tag{
+  display:inline-block;
+  margin-top:10px;
+  padding:7px 10px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:950;
+  border:1px solid rgba(148,163,184,.18);
+  background:rgba(148,163,184,.10);
+}
+.tag.good{border-color:rgba(34,197,94,.28);background:rgba(34,197,94,.12);color:var(--accent)}
+.tag.warn{border-color:rgba(245,158,11,.28);background:rgba(245,158,11,.12);color:var(--warn)}
+.tag.bad{border-color:rgba(239,68,68,.28);background:rgba(239,68,68,.12);color:var(--bad)}
+
 .history-item{
-  border-bottom:1px solid var(--border);
+  border-bottom:1px solid rgba(31,41,55,.65);
   padding:10px 0;
   font-size:12px;
 }
+.history-item:last-child{border-bottom:none}
+.muted{color:var(--muted)}
+
 footer{
   text-align:center;
   font-size:11px;
   color:var(--muted);
-  margin:24px 0;
+  margin:18px 0 0;
 }
 </style>
 </head>
@@ -101,7 +241,7 @@ footer{
     <label>Type d’usage</label>
     <select id="usage">
       <option value="city">Ville</option>
-      <option value="mixed">Mixte</option>
+      <option value="mixed" selected>Mixte</option>
       <option value="road">Route</option>
     </select>
 
@@ -124,8 +264,8 @@ footer{
   </div>
 
   <div class="card">
-    <b>Historique</b>
-    <div id="history"></div>
+    <b style="font-weight:950">Historique</b>
+    <div id="history" style="margin-top:10px"></div>
   </div>
 
   <footer>
@@ -141,58 +281,142 @@ function factorUsage(u){
   if(u==="road") return 1.2;
   return 1;
 }
-
 function base(vehicle){
   if(vehicle==="bike"){
     return {oil:6000, brakes:8000, tires:7000};
   }
   return {oil:10000, brakes:12000, tires:10000};
 }
+function tagForRemaining(rem){
+  if(rem <= 0) return {cls:"bad", txt:"Urgent"};
+  if(rem <= 500) return {cls:"warn", txt:"Bientôt"};
+  return {cls:"good", txt:"OK"};
+}
 
 function calculate(){
-  const v = vehicle.value;
-  const u = usage.value;
-  const km = Number(kmNow.value);
-  const oil = Number(kmOil.value);
-  const br = Number(kmBrakes.value);
-  const ti = Number(kmTires.value);
+  const v = document.getElementById("vehicle").value;
+  const u = document.getElementById("usage").value;
 
-  if(!km){ alert("Kilométrage actuel requis"); return; }
+  const km = Number(document.getElementById("kmNow").value);
+  const oil = Number(document.getElementById("kmOil").value);
+  const br  = Number(document.getElementById("kmBrakes").value);
+  const ti  = Number(document.getElementById("kmTires").value);
+
+  if(!km || km <= 0){
+    alert("Kilométrage actuel requis.");
+    return;
+  }
 
   const f = factorUsage(u);
   const b = base(v);
 
-  const oilNext = (oil||km) + Math.round(b.oil*f);
-  const brNext  = (br||km)  + Math.round(b.brakes*f);
-  const tiNext  = (ti||km)  + Math.round(b.tires*f);
+  const oilInterval = Math.round(b.oil*f);
+  const brInterval  = Math.round(b.brakes*f);
+  const tiInterval  = Math.round(b.tires*f);
 
-  output.innerHTML = `
+  const oilNext = (oil||km) + oilInterval;
+  const brNext  = (br||km)  + brInterval;
+  const tiNext  = (ti||km)  + tiInterval;
+
+  const remOil = oilNext - km;
+  const remBr  = brNext  - km;
+  const remTi  = tiNext  - km;
+
+  const tOil = tagForRemaining(remOil);
+  const tBr  = tagForRemaining(remBr);
+  const tTi  = tagForRemaining(remTi);
+
+  const fmt = (n)=>Number(n).toLocaleString("fr-FR");
+
+  // store last calc for history
+  window.__lastCalc = {
+    v,u,km,oil,br,ti,
+    oilNext,brNext,tiNext,
+    remOil,remBr,remTi
+  };
+
+  document.getElementById("output").innerHTML = `
     <div class="result">
-      <div>🛢️ Vidange : <b>${oilNext.toLocaleString()} km</b></div>
-      <div>🛑 Freins : <b>${brNext.toLocaleString()} km</b></div>
-      <div>🛞 Pneus : <b>${tiNext.toLocaleString()} km</b></div>
+      <div class="kpi">
+        <div class="left">
+          <div class="icon ${tOil.cls}">🛢️</div>
+          <div style="min-width:0">
+            <div class="name">Vidange</div>
+            <div class="sub">Reste ~ ${fmt(remOil)} km</div>
+          </div>
+        </div>
+        <div class="right">${fmt(oilNext)} km</div>
+      </div>
+
+      <div class="kpi">
+        <div class="left">
+          <div class="icon ${tBr.cls}">🛑</div>
+          <div style="min-width:0">
+            <div class="name">Freins (contrôle)</div>
+            <div class="sub">Reste ~ ${fmt(remBr)} km</div>
+          </div>
+        </div>
+        <div class="right">${fmt(brNext)} km</div>
+      </div>
+
+      <div class="kpi">
+        <div class="left">
+          <div class="icon ${tTi.cls}">🛞</div>
+          <div style="min-width:0">
+            <div class="name">Pneus (contrôle)</div>
+            <div class="sub">Reste ~ ${fmt(remTi)} km</div>
+          </div>
+        </div>
+        <div class="right">${fmt(tiNext)} km</div>
+      </div>
+
+      <span class="tag ${tOil.cls}">Vidange : ${tOil.txt}</span>
+      <span class="tag ${tBr.cls}" style="margin-left:8px">Freins : ${tBr.txt}</span>
+      <span class="tag ${tTi.cls}" style="margin-left:8px">Pneus : ${tTi.txt}</span>
+
+      <div class="muted" style="margin-top:10px;font-size:11px">
+        Astuce : en “Ville”, l’intervalle est plus court. En “Route”, il est plus long.
+      </div>
     </div>
   `;
 }
 
 function saveHistory(){
-  if(!output.innerHTML){ alert("Fais un calcul avant"); return; }
-  const h = JSON.parse(localStorage.getItem("autocare_history")||"[]");
+  if(!window.__lastCalc){
+    alert("Fais un calcul avant d’ajouter à l’historique.");
+    return;
+  }
+  const h = JSON.parse(localStorage.getItem("autocare_history_v3")||"[]");
   h.unshift({
-    date:new Date().toLocaleString(),
-    text:output.innerHTML
+    date:new Date().toLocaleString("fr-FR"),
+    data: window.__lastCalc
   });
-  localStorage.setItem("autocare_history", JSON.stringify(h.slice(0,20)));
+  localStorage.setItem("autocare_history_v3", JSON.stringify(h.slice(0,30)));
   renderHistory();
 }
 
 function renderHistory(){
-  const h = JSON.parse(localStorage.getItem("autocare_history")||"[]");
-  history.innerHTML = h.length ? h.map(e=>`
-    <div class="history-item">
-      <b>${e.date}</b><br>${e.text}
-    </div>
-  `).join("") : "<p style='color:#9ca3af;font-size:12px'>Aucun historique</p>";
+  const h = JSON.parse(localStorage.getItem("autocare_history_v3")||"[]");
+  const box = document.getElementById("history");
+  const fmt = (n)=>Number(n).toLocaleString("fr-FR");
+  if(!h.length){
+    box.innerHTML = "<div class='muted' style='margin-top:10px;font-size:12px'>Aucun historique pour l’instant.</div>";
+    return;
+  }
+  box.innerHTML = h.map(e=>{
+    const d = e.data;
+    const who = d.v==="bike" ? "Moto" : "Voiture";
+    const use = d.u==="city" ? "Ville" : (d.u==="road" ? "Route" : "Mixte");
+    return `
+      <div class="history-item">
+        <b>${e.date}</b><br>
+        <span class="muted">${who} • ${use} • km: ${fmt(d.km)}</span><br>
+        🛢️ Vidange: <b>${fmt(d.oilNext)} km</b> •
+        🛑 Freins: <b>${fmt(d.brNext)} km</b> •
+        🛞 Pneus: <b>${fmt(d.tiNext)} km</b>
+      </div>
+    `;
+  }).join("");
 }
 renderHistory();
 </script>
