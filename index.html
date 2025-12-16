@@ -49,6 +49,7 @@
       display:grid;
       gap:16px;
     }
+
     .row{display:grid; gap:16px}
     @media(min-width:900px){ .row{grid-template-columns:1fr 1fr} }
 
@@ -121,6 +122,19 @@
     .actions{display:flex; gap:10px; margin-top:10px; flex-wrap:wrap}
     .actions .btn{width:auto; padding:10px 12px; font-size:.95rem}
 
+    /* Pro helper */
+    .proLock{
+      margin-top:10px;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid rgba(245,158,11,.35);
+      background:rgba(245,158,11,.08);
+      color:#fde68a;
+      font-size:.9rem;
+      display:none;
+    }
+    .proLock.show{display:block}
+
     /* Modal */
     .modal{
       position:fixed; inset:0;
@@ -133,7 +147,7 @@
     }
     .modal.open{display:flex}
     .modalBox{
-      width:min(620px,100%);
+      width:min(560px,100%);
       background:rgba(15,23,42,.98);
       border:1px solid var(--border);
       border-radius:18px;
@@ -171,8 +185,6 @@
       display:none;
     }
     .err.show{display:block}
-
-    .hr{height:1px;background:rgba(31,41,55,.7);margin:14px 0;border-radius:999px}
   </style>
 </head>
 
@@ -184,31 +196,24 @@
 
 <main>
 
-  <!-- Pro -->
+  <!-- Statut Pro -->
   <div class="card">
     <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
       <div>
         <h2>⭐ AutoCare+ Pro</h2>
-        <div class="muted">Garage illimité · Export PDF · Sauvegarde & restauration</div>
+        <div class="muted">Garage illimité · Export PDF · Sauvegarde & restauration · Suivi factures</div>
       </div>
       <div id="proPill" class="pill off">🔒 Pro: OFF</div>
     </div>
 
     <div class="actions" style="margin-top:12px">
       <button class="btn" id="buyProBtn">Passer en Pro (12€)</button>
-      <button class="btn secondary" id="activateProBtn">Entrer un code</button>
+      <button class="btn secondary" id="activateProBtn">Activer Pro</button>
       <button class="btn danger" id="resetProBtn" title="Désactive le Pro sur cet appareil">Désactiver</button>
     </div>
 
     <div class="small">
-      Paiement via PayPal → tu reçois un email automatique avec ton code → tu colles le code ici.
-    </div>
-
-    <div class="hr"></div>
-
-    <div class="actions" style="margin-top:0; justify-content:space-between; width:100%;">
-      <button class="btn secondary" id="pwaResetBtn" title="Corrige les problèmes d'ancien code (cache PWA)">🧹 Réparer cache / PWA</button>
-      <span class="pill" id="buildPill" title="Version du site">v2025.12.16</span>
+      Paiement via PayPal.Me → tu reçois un email automatique avec le code → tu colles le code ici.
     </div>
   </div>
 
@@ -263,6 +268,18 @@
       <label>Kilométrage</label>
       <input id="maintKm" type="number" placeholder="Ex : 132000">
 
+      <!-- NIVEAU 2 – PHASE 1 -->
+      <label>💰 Coût (€)</label>
+      <input id="maintCost" type="number" placeholder="Ex : 180">
+
+      <label>🧾 Détails facture / pièces (Pro)</label>
+      <textarea id="maintInvoiceNote" placeholder="Ex : Facture Norauto n°45879, pneus Michelin, etc."></textarea>
+      <div class="proLock" id="proLockInvoice">🔒 Pro requis pour saisir les détails facture / pièces.</div>
+
+      <label>📎 Référence facture (Pro)</label>
+      <input id="maintInvoiceRef" type="text" placeholder="Ex : facture_mars_2025.pdf ou photo_tel_vidange.jpg">
+      <div class="proLock" id="proLockRef">🔒 Pro requis pour saisir une référence de facture.</div>
+
       <label>Note (optionnel)</label>
       <textarea id="maintNote" placeholder="Ex : huile 5W30, filtre remplacé, etc."></textarea>
 
@@ -297,11 +314,9 @@
     <div class="muted">Colle ici le code reçu par email après paiement.</div>
 
     <label style="margin-top:10px">Code d’activation</label>
-    <input id="proCodeInput" type="text" placeholder="Ex : AUTOPRO-2025-ABCD">
+    <input id="proCodeInput" type="text" placeholder="Ex : AUTOPRO-2025">
 
-    <div class="note">
-      Si tu n’as pas encore payé : clique “Passer en Pro”, paie 12€, puis reviens ici.
-    </div>
+    <div class="note">Si tu n’as pas encore payé : clique “Passer en Pro”, paie 12€, puis reviens ici.</div>
     <div class="ok" id="proOk">✅ Pro activé sur cet appareil.</div>
     <div class="err" id="proErr">❌ Code incorrect.</div>
 
@@ -313,30 +328,17 @@
 </div>
 
 <script>
-  /****************
+  /**************
    * CONFIG
-   ****************/
-  // Mets ton lien PayPal.Me EXACT ici (celui qui reçoit l'argent)
-  const PAYPAL_ME = "https://www.paypal.com/paypalme/autocareplus811/12";
+   **************/
+  const PAYPAL_ME = "https://www.paypal.com/paypalme/autocareplus811/12"; // 12€ (PayPal choisira la devise si besoin)
+  const PRO_CODE  = "AUTOPRO-2025"; // code attendu sur le site (tu peux le changer)
 
-  // IMPORTANT :
-  // Ce code est seulement un exemple local.
-  // Dans TON système automatique via Make (PayPal → Sheets → Gmail),
-  // tu généreras un code unique par client.
-  //
-  // Pour cette version statique, on accepte une liste de codes (optionnel).
-  const VALID_CODES = [
-    "AUTOPRO-2025",
-    // Tu peux ajouter d'autres codes si tu veux tester :
-    // "TEST-1234",
-  ];
-
-  /****************
+  /**************
    * STORAGE
-   ****************/
-  const LS_KEY = "autocare_data_v2";
-  const LS_PRO = "autocare_pro_v2";
-  const LS_PRO_CODE = "autocare_pro_code_v2";
+   **************/
+  const LS_KEY = "autocare_data_v2"; // bump version pour éviter conflits anciens
+  const LS_PRO = "autocare_pro_v1";
 
   function loadData(){
     try{
@@ -348,30 +350,29 @@
   function saveData(data){ localStorage.setItem(LS_KEY, JSON.stringify(data)); }
 
   function isPro(){ return localStorage.getItem(LS_PRO) === "1"; }
-  function setPro(v, code){
-    localStorage.setItem(LS_PRO, v ? "1" : "0");
-    if(v && code) localStorage.setItem(LS_PRO_CODE, code);
-    if(!v) localStorage.removeItem(LS_PRO_CODE);
-    refreshProUI(); renderAll();
-  }
+  function setPro(v){ localStorage.setItem(LS_PRO, v ? "1" : "0"); refreshProUI(); renderAll(); }
 
-  /****************
+  /**************
    * UI HELPERS
-   ****************/
+   **************/
   const $ = (id)=>document.getElementById(id);
 
   function refreshProUI(){
     const pill = $("proPill");
-    if(isPro()){
+    const pro = isPro();
+    if(pro){
       pill.classList.remove("off");
       pill.classList.add("on");
-      const code = localStorage.getItem(LS_PRO_CODE) || "";
-      pill.textContent = "✅ Pro: ON" + (code ? " · " + code : "");
+      pill.textContent = "✅ Pro: ON";
     }else{
       pill.classList.remove("on");
       pill.classList.add("off");
       pill.textContent = "🔒 Pro: OFF";
     }
+
+    // Locks (affichés seulement si l'utilisateur tape dans les champs Pro)
+    $("proLockInvoice").classList.toggle("show", !pro && ($("maintInvoiceNote").value.trim().length>0));
+    $("proLockRef").classList.toggle("show", !pro && ($("maintInvoiceRef").value.trim().length>0));
   }
 
   function showModal(open){
@@ -390,9 +391,16 @@
       .replaceAll('"',"&quot;").replaceAll("'","&#039;");
   }
 
-  /****************
+  function fmtMoney(x){
+    const n = Number(x);
+    if(!isFinite(n) || n === 0) return "";
+    // affichage simple sans Intl (offline/compat)
+    return `${n.toFixed(0)} €`;
+  }
+
+  /**************
    * RENDER
-   ****************/
+   **************/
   function renderVehicles(){
     const data = loadData();
     const list = $("vehicleList");
@@ -420,6 +428,7 @@
         const d = loadData();
         const vehId = d.vehicles[i]?.id;
         d.vehicles.splice(i,1);
+        // supprime aussi les entretiens liés
         d.maint = d.maint.filter(m=>m.vehId !== vehId);
         saveData(d);
         renderAll();
@@ -445,13 +454,13 @@
       });
     }
 
-    // limite gratuite : 1 véhicule
+    // limite gratuite
     if(!isPro() && data.vehicles.length > 1){
-      // sécurité : garde seulement le premier
-      const keep = data.vehicles[0];
-      data.vehicles = [keep];
-      data.maint = data.maint.filter(m=>m.vehId === keep?.id);
+      // sécurité (au cas où)
+      data.vehicles = data.vehicles.slice(0,1);
+      data.maint = data.maint.filter(m=>m.vehId === data.vehicles[0]?.id);
       saveData(data);
+      renderAll();
     }
   }
 
@@ -465,6 +474,7 @@
       return;
     }
 
+    // tri date desc
     const sorted = [...data.maint].sort((a,b)=>{
       const da = a.date ? new Date(a.date).getTime() : 0;
       const db = b.date ? new Date(b.date).getTime() : 0;
@@ -473,6 +483,8 @@
 
     sorted.forEach((m)=>{
       const veh = data.vehicles.find(v=>v.id===m.vehId);
+      const cost = fmtMoney(m.cost);
+
       const div = document.createElement("div");
       div.className = "item";
       div.innerHTML = `
@@ -480,6 +492,13 @@
           <div>
             <strong>${escapeHtml(m.type)} — ${escapeHtml(m.km)} km</strong>
             <div class="tag">${escapeHtml(m.date || "")} · ${veh ? escapeHtml(veh.brand+" "+veh.model) : "Véhicule supprimé"}</div>
+
+            ${cost ? `<div class="muted" style="margin-top:6px">💰 ${escapeHtml(cost)}</div>` : ""}
+
+            ${m.invoiceNote ? `<div class="muted" style="margin-top:6px">🧾 ${escapeHtml(m.invoiceNote)}</div>` : ""}
+
+            ${m.invoiceRef ? `<div class="muted" style="margin-top:6px">📎 ${escapeHtml(m.invoiceRef)}</div>` : ""}
+
             ${m.note ? `<div class="muted" style="margin-top:6px">${escapeHtml(m.note)}</div>` : ""}
           </div>
           <button class="btn danger" style="width:auto;padding:8px 10px;font-size:.9rem" data-delmaint="${m.id}">Supprimer</button>
@@ -505,13 +524,14 @@
     refreshProUI();
   }
 
-  /****************
+  /**************
    * ACTIONS
-   ****************/
+   **************/
   $("saveVehicleBtn").addEventListener("click", ()=>{
     const data = loadData();
 
-    if(!isPro() && data.vehicles.length >= 1){
+    const pro = isPro();
+    if(!pro && data.vehicles.length >= 1){
       alert("Version gratuite : 1 véhicule max. Passe en Pro pour garage illimité.");
       return;
     }
@@ -541,6 +561,10 @@
     renderAll();
   });
 
+  // Locks live (si user gratuit tape dans champs pro)
+  $("maintInvoiceNote").addEventListener("input", refreshProUI);
+  $("maintInvoiceRef").addEventListener("input", refreshProUI);
+
   $("saveMaintBtn").addEventListener("click", ()=>{
     const data = loadData();
     const vehId = $("vehSelect").value;
@@ -552,10 +576,19 @@
     const type = $("maintType").value;
     const date = $("maintDate").value;
     const km = $("maintKm").value.trim();
+    const cost = $("maintCost").value.trim();
+    const invoiceNote = $("maintInvoiceNote").value.trim();
+    const invoiceRef = $("maintInvoiceRef").value.trim();
     const note = $("maintNote").value.trim();
 
     if(!km){
       alert("Kilométrage requis.");
+      return;
+    }
+
+    // PRO gating (Niveau 2 – phase 1)
+    if(!isPro() && (invoiceNote || invoiceRef)){
+      alert("Fonction Pro : les détails facture / référence sont réservés au Pro.");
       return;
     }
 
@@ -565,12 +598,18 @@
       type,
       date,
       km: Number(km),
+      cost: cost ? Number(cost) : 0,        // coût (gratuit)
+      invoiceNote: invoiceNote || "",       // Pro
+      invoiceRef: invoiceRef || "",         // Pro
       note
     });
 
     saveData(data);
 
     $("maintKm").value = "";
+    $("maintCost").value = "";
+    $("maintInvoiceNote").value = "";
+    $("maintInvoiceRef").value = "";
     $("maintNote").value = "";
 
     renderAll();
@@ -594,15 +633,8 @@
     $("proOk").classList.remove("show");
     $("proErr").classList.remove("show");
 
-    if(!code){
-      $("proErr").classList.add("show");
-      return;
-    }
-
-    // Ici tu peux remplacer par une vraie validation si tu as un endpoint.
-    const ok = VALID_CODES.some(c => c.toUpperCase() === code.toUpperCase());
-    if(ok){
-      setPro(true, code.toUpperCase());
+    if(code && code.toUpperCase() === PRO_CODE.toUpperCase()){
+      setPro(true);
       $("proOk").classList.add("show");
       setTimeout(()=>showModal(false), 650);
     }else{
@@ -617,7 +649,7 @@
     }
   });
 
-  // Export PDF (print)
+  // Export PDF (simple via print)
   $("exportPdfBtn").addEventListener("click", ()=>{
     if(!isPro()){
       alert("Fonction Pro. Active Pro pour exporter en PDF.");
@@ -635,7 +667,11 @@
     lines.push("Entretiens:");
     data.maint.forEach(m=>{
       const v = data.vehicles.find(x=>x.id===m.vehId);
-      lines.push(`- ${m.date || ""} | ${m.type} | ${m.km} km | ${v ? (v.brand+" "+v.model) : ""} ${m.note ? ("| "+m.note) : ""}`);
+      const money = m.cost ? `${m.cost} €` : "";
+      const inv = m.invoiceNote ? ` | Facture/pièces: ${m.invoiceNote}` : "";
+      const ref = m.invoiceRef ? ` | Ref: ${m.invoiceRef}` : "";
+      const note = m.note ? ` | Note: ${m.note}` : "";
+      lines.push(`- ${m.date || ""} | ${m.type} | ${m.km} km | ${v ? (v.brand+" "+v.model) : ""}${money ? " | "+money : ""}${inv}${ref}${note}`);
     });
 
     const w = window.open("", "_blank");
@@ -689,6 +725,13 @@
             alert("Fichier invalide.");
             return;
           }
+          // compat: si anciens champs manquent
+          data.maint = data.maint.map(m=>({
+            ...m,
+            cost: Number(m.cost||0),
+            invoiceNote: String(m.invoiceNote||""),
+            invoiceRef: String(m.invoiceRef||""),
+          }));
           saveData(data);
           renderAll();
           alert("✅ Restauration terminée.");
@@ -701,35 +744,15 @@
     input.click();
   });
 
-  // 🔥 Réparer cache / PWA (c’est LA solution à ton popup fantôme)
-  $("pwaResetBtn").addEventListener("click", async ()=>{
-    try{
-      // unregister SW
-      if("serviceWorker" in navigator){
-        const regs = await navigator.serviceWorker.getRegistrations();
-        for(const r of regs) await r.unregister();
-      }
-      // clear caches
-      if("caches" in window){
-        const keys = await caches.keys();
-        for(const k of keys) await caches.delete(k);
-      }
-      alert("✅ Cache/PWA nettoyés. La page va se recharger.");
-      location.reload(true);
-    }catch(e){
-      alert("⚠️ Impossible de nettoyer automatiquement. Fais Ctrl+F5.");
-    }
-  });
-
-  /****************
+  /**************
    * INIT
-   ****************/
+   **************/
   renderAll();
 
-  // Service Worker (versionné)
+  // Service Worker
   if("serviceWorker" in navigator){
     window.addEventListener("load", ()=>{
-      navigator.serviceWorker.register("./sw.js?v=2025-12-16").catch(()=>{});
+      navigator.serviceWorker.register("./sw.js").catch(()=>{});
     });
   }
 </script>
