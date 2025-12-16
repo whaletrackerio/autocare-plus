@@ -200,7 +200,7 @@
     </div>
 
     <div class="small">
-      Paiement via PayPal.Me → tu reçois un email automatique avec le code → tu colles le code ici.
+      Paiement via PayPal → tu reçois un email automatique avec le code → tu colles le code ici.
     </div>
   </div>
 
@@ -306,8 +306,13 @@
   /**************
    * CONFIG
    **************/
-  const PAYPAL_ME = "https://www.paypal.com/paypalme/autocareplus811/12"; // 12€ (PayPal choisira la devise si besoin)
-  const PRO_CODE  = "AUTOPRO-2025"; // <-- change ça pour le code que tu mets dans ton email auto
+  // ✅ Lien PAYPAL LIVE (ton client paye ici)
+  // Astuce: PayPal.me peut être /12 (montant), ou avec "checkout" selon ta config.
+  const PAYPAL_ME = "https://paypal.me/autocareplus811/12";
+
+  // ⚠️ Ton “code Pro” doit correspondre à ce que tu envoies par email (Make/Gmail)
+  // (Plus tard on mettra un système de codes uniques, là c'est la version simple)
+  const PRO_CODE  = "AUTOPRO-2025";
 
   /**************
    * STORAGE
@@ -386,21 +391,18 @@
       list.appendChild(div);
     });
 
-    // suppression
     list.querySelectorAll("[data-del]").forEach(btn=>{
       btn.addEventListener("click", ()=>{
         const i = Number(btn.getAttribute("data-del"));
         const d = loadData();
         const vehId = d.vehicles[i]?.id;
         d.vehicles.splice(i,1);
-        // supprime aussi les entretiens liés
         d.maint = d.maint.filter(m=>m.vehId !== vehId);
         saveData(d);
         renderAll();
       });
     });
 
-    // select véhicules
     const sel = $("vehSelect");
     sel.innerHTML = "";
     if(data.vehicles.length === 0){
@@ -421,7 +423,6 @@
 
     // limite gratuite
     if(!isProUser && data.vehicles.length > 1){
-      // sécurité (au cas où)
       data.vehicles = data.vehicles.slice(0,1);
       data.maint = data.maint.filter(m=>m.vehId === data.vehicles[0]?.id);
       saveData(data);
@@ -439,7 +440,6 @@
       return;
     }
 
-    // tri date desc
     const sorted = [...data.maint].sort((a,b)=>{
       const da = a.date ? new Date(a.date).getTime() : 0;
       const db = b.date ? new Date(b.date).getTime() : 0;
@@ -552,10 +552,10 @@
     renderAll();
   });
 
-  // PayPal
+  // ✅ ACHAT PRO = redirection PayPal + ouverture modal
   $("buyProBtn").addEventListener("click", ()=>{
-    window.open(PAYPAL_ME, "_blank", "noopener,noreferrer");
-    showModal(true);
+    // redirige (pas de popup bloquée)
+    window.location.href = PAYPAL_ME;
   });
 
   // Activer Pro
@@ -592,7 +592,6 @@
       alert("Fonction Pro. Active Pro pour exporter en PDF.");
       return;
     }
-    // Print-friendly
     const data = loadData();
     const lines = [];
     lines.push("AutoCare+ — Export");
@@ -675,6 +674,13 @@
    * INIT
    **************/
   renderAll();
+
+  // ✅ Si le client revient de PayPal, on peut ouvrir direct le modal
+  // (optionnel) : ajoute ?paid=1 à ton lien PayPal si tu veux
+  const params = new URLSearchParams(location.search);
+  if(params.get("activate") === "1"){
+    showModal(true);
+  }
 
   // Service Worker
   if("serviceWorker" in navigator){
