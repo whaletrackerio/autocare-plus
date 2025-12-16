@@ -49,7 +49,6 @@
       display:grid;
       gap:16px;
     }
-
     .row{display:grid; gap:16px}
     @media(min-width:900px){ .row{grid-template-columns:1fr 1fr} }
 
@@ -134,7 +133,7 @@
     }
     .modal.open{display:flex}
     .modalBox{
-      width:min(560px,100%);
+      width:min(620px,100%);
       background:rgba(15,23,42,.98);
       border:1px solid var(--border);
       border-radius:18px;
@@ -172,6 +171,8 @@
       display:none;
     }
     .err.show{display:block}
+
+    .hr{height:1px;background:rgba(31,41,55,.7);margin:14px 0;border-radius:999px}
   </style>
 </head>
 
@@ -183,7 +184,7 @@
 
 <main>
 
-  <!-- Statut Pro -->
+  <!-- Pro -->
   <div class="card">
     <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
       <div>
@@ -195,12 +196,19 @@
 
     <div class="actions" style="margin-top:12px">
       <button class="btn" id="buyProBtn">Passer en Pro (12€)</button>
-      <button class="btn secondary" id="activateProBtn">Activer Pro</button>
+      <button class="btn secondary" id="activateProBtn">Entrer un code</button>
       <button class="btn danger" id="resetProBtn" title="Désactive le Pro sur cet appareil">Désactiver</button>
     </div>
 
     <div class="small">
-      Paiement via PayPal → tu reçois un email automatique avec le code → tu colles le code ici.
+      Paiement via PayPal → tu reçois un email automatique avec ton code → tu colles le code ici.
+    </div>
+
+    <div class="hr"></div>
+
+    <div class="actions" style="margin-top:0; justify-content:space-between; width:100%;">
+      <button class="btn secondary" id="pwaResetBtn" title="Corrige les problèmes d'ancien code (cache PWA)">🧹 Réparer cache / PWA</button>
+      <span class="pill" id="buildPill" title="Version du site">v2025.12.16</span>
     </div>
   </div>
 
@@ -289,9 +297,11 @@
     <div class="muted">Colle ici le code reçu par email après paiement.</div>
 
     <label style="margin-top:10px">Code d’activation</label>
-    <input id="proCodeInput" type="text" placeholder="Ex : AUTOPRO-2025">
+    <input id="proCodeInput" type="text" placeholder="Ex : AUTOPRO-2025-ABCD">
 
-    <div class="note">Si tu n’as pas encore payé : clique “Passer en Pro”, paie 12€, puis reviens ici.</div>
+    <div class="note">
+      Si tu n’as pas encore payé : clique “Passer en Pro”, paie 12€, puis reviens ici.
+    </div>
     <div class="ok" id="proOk">✅ Pro activé sur cet appareil.</div>
     <div class="err" id="proErr">❌ Code incorrect.</div>
 
@@ -303,22 +313,30 @@
 </div>
 
 <script>
-  /**************
+  /****************
    * CONFIG
-   **************/
-  // ✅ Lien PAYPAL LIVE (ton client paye ici)
-  // Astuce: PayPal.me peut être /12 (montant), ou avec "checkout" selon ta config.
-  const PAYPAL_ME = "https://paypal.me/autocareplus811/12";
+   ****************/
+  // Mets ton lien PayPal.Me EXACT ici (celui qui reçoit l'argent)
+  const PAYPAL_ME = "https://www.paypal.com/paypalme/autocareplus811/12";
 
-  // ⚠️ Ton “code Pro” doit correspondre à ce que tu envoies par email (Make/Gmail)
-  // (Plus tard on mettra un système de codes uniques, là c'est la version simple)
-  const PRO_CODE  = "AUTOPRO-2025";
+  // IMPORTANT :
+  // Ce code est seulement un exemple local.
+  // Dans TON système automatique via Make (PayPal → Sheets → Gmail),
+  // tu généreras un code unique par client.
+  //
+  // Pour cette version statique, on accepte une liste de codes (optionnel).
+  const VALID_CODES = [
+    "AUTOPRO-2025",
+    // Tu peux ajouter d'autres codes si tu veux tester :
+    // "TEST-1234",
+  ];
 
-  /**************
+  /****************
    * STORAGE
-   **************/
-  const LS_KEY = "autocare_data_v1";
-  const LS_PRO = "autocare_pro_v1";
+   ****************/
+  const LS_KEY = "autocare_data_v2";
+  const LS_PRO = "autocare_pro_v2";
+  const LS_PRO_CODE = "autocare_pro_code_v2";
 
   function loadData(){
     try{
@@ -330,11 +348,16 @@
   function saveData(data){ localStorage.setItem(LS_KEY, JSON.stringify(data)); }
 
   function isPro(){ return localStorage.getItem(LS_PRO) === "1"; }
-  function setPro(v){ localStorage.setItem(LS_PRO, v ? "1" : "0"); refreshProUI(); renderAll(); }
+  function setPro(v, code){
+    localStorage.setItem(LS_PRO, v ? "1" : "0");
+    if(v && code) localStorage.setItem(LS_PRO_CODE, code);
+    if(!v) localStorage.removeItem(LS_PRO_CODE);
+    refreshProUI(); renderAll();
+  }
 
-  /**************
+  /****************
    * UI HELPERS
-   **************/
+   ****************/
   const $ = (id)=>document.getElementById(id);
 
   function refreshProUI(){
@@ -342,7 +365,8 @@
     if(isPro()){
       pill.classList.remove("off");
       pill.classList.add("on");
-      pill.textContent = "✅ Pro: ON";
+      const code = localStorage.getItem(LS_PRO_CODE) || "";
+      pill.textContent = "✅ Pro: ON" + (code ? " · " + code : "");
     }else{
       pill.classList.remove("on");
       pill.classList.add("off");
@@ -366,15 +390,13 @@
       .replaceAll('"',"&quot;").replaceAll("'","&#039;");
   }
 
-  /**************
+  /****************
    * RENDER
-   **************/
+   ****************/
   function renderVehicles(){
     const data = loadData();
     const list = $("vehicleList");
     list.innerHTML = "";
-
-    const isProUser = isPro();
 
     data.vehicles.forEach((v, idx)=>{
       const div = document.createElement("div");
@@ -391,6 +413,7 @@
       list.appendChild(div);
     });
 
+    // suppression
     list.querySelectorAll("[data-del]").forEach(btn=>{
       btn.addEventListener("click", ()=>{
         const i = Number(btn.getAttribute("data-del"));
@@ -403,6 +426,7 @@
       });
     });
 
+    // select véhicules
     const sel = $("vehSelect");
     sel.innerHTML = "";
     if(data.vehicles.length === 0){
@@ -421,12 +445,13 @@
       });
     }
 
-    // limite gratuite
-    if(!isProUser && data.vehicles.length > 1){
-      data.vehicles = data.vehicles.slice(0,1);
-      data.maint = data.maint.filter(m=>m.vehId === data.vehicles[0]?.id);
+    // limite gratuite : 1 véhicule
+    if(!isPro() && data.vehicles.length > 1){
+      // sécurité : garde seulement le premier
+      const keep = data.vehicles[0];
+      data.vehicles = [keep];
+      data.maint = data.maint.filter(m=>m.vehId === keep?.id);
       saveData(data);
-      renderAll();
     }
   }
 
@@ -480,14 +505,13 @@
     refreshProUI();
   }
 
-  /**************
+  /****************
    * ACTIONS
-   **************/
+   ****************/
   $("saveVehicleBtn").addEventListener("click", ()=>{
     const data = loadData();
 
-    const pro = isPro();
-    if(!pro && data.vehicles.length >= 1){
+    if(!isPro() && data.vehicles.length >= 1){
       alert("Version gratuite : 1 véhicule max. Passe en Pro pour garage illimité.");
       return;
     }
@@ -552,10 +576,10 @@
     renderAll();
   });
 
-  // ✅ ACHAT PRO = redirection PayPal + ouverture modal
+  // PayPal
   $("buyProBtn").addEventListener("click", ()=>{
-    // redirige (pas de popup bloquée)
-    window.location.href = PAYPAL_ME;
+    window.open(PAYPAL_ME, "_blank", "noopener,noreferrer");
+    showModal(true);
   });
 
   // Activer Pro
@@ -570,8 +594,15 @@
     $("proOk").classList.remove("show");
     $("proErr").classList.remove("show");
 
-    if(code && code.toUpperCase() === PRO_CODE.toUpperCase()){
-      setPro(true);
+    if(!code){
+      $("proErr").classList.add("show");
+      return;
+    }
+
+    // Ici tu peux remplacer par une vraie validation si tu as un endpoint.
+    const ok = VALID_CODES.some(c => c.toUpperCase() === code.toUpperCase());
+    if(ok){
+      setPro(true, code.toUpperCase());
       $("proOk").classList.add("show");
       setTimeout(()=>showModal(false), 650);
     }else{
@@ -586,7 +617,7 @@
     }
   });
 
-  // Export PDF (simple via print)
+  // Export PDF (print)
   $("exportPdfBtn").addEventListener("click", ()=>{
     if(!isPro()){
       alert("Fonction Pro. Active Pro pour exporter en PDF.");
@@ -670,22 +701,35 @@
     input.click();
   });
 
-  /**************
+  // 🔥 Réparer cache / PWA (c’est LA solution à ton popup fantôme)
+  $("pwaResetBtn").addEventListener("click", async ()=>{
+    try{
+      // unregister SW
+      if("serviceWorker" in navigator){
+        const regs = await navigator.serviceWorker.getRegistrations();
+        for(const r of regs) await r.unregister();
+      }
+      // clear caches
+      if("caches" in window){
+        const keys = await caches.keys();
+        for(const k of keys) await caches.delete(k);
+      }
+      alert("✅ Cache/PWA nettoyés. La page va se recharger.");
+      location.reload(true);
+    }catch(e){
+      alert("⚠️ Impossible de nettoyer automatiquement. Fais Ctrl+F5.");
+    }
+  });
+
+  /****************
    * INIT
-   **************/
+   ****************/
   renderAll();
 
-  // ✅ Si le client revient de PayPal, on peut ouvrir direct le modal
-  // (optionnel) : ajoute ?paid=1 à ton lien PayPal si tu veux
-  const params = new URLSearchParams(location.search);
-  if(params.get("activate") === "1"){
-    showModal(true);
-  }
-
-  // Service Worker
+  // Service Worker (versionné)
   if("serviceWorker" in navigator){
     window.addEventListener("load", ()=>{
-      navigator.serviceWorker.register("./sw.js").catch(()=>{});
+      navigator.serviceWorker.register("./sw.js?v=2025-12-16").catch(()=>{});
     });
   }
 </script>
