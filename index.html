@@ -207,13 +207,16 @@
     </div>
 
     <div class="actions" style="margin-top:12px">
-      <button class="btn" id="buyProBtn">Passer en Pro (12€)</button>
+      <!-- MODIF: 2 boutons -->
+      <button class="btn" id="buyProYearBtn">Pro Annuel (12€)</button>
+      <button class="btn" id="buyProLifeBtn">Pro À VIE (25€)</button>
+
       <button class="btn secondary" id="activateProBtn">Activer Pro</button>
       <button class="btn danger" id="resetProBtn" title="Désactive le Pro sur cet appareil">Désactiver</button>
     </div>
 
     <div class="small">
-      Paiement via PayPal.Me → tu reçois un email automatique avec le code → tu colles le code ici.
+      Paiement PayPal → tu reçois un email automatique avec le code → tu colles le code ici.
     </div>
   </div>
 
@@ -314,9 +317,11 @@
     <div class="muted">Colle ici le code reçu par email après paiement.</div>
 
     <label style="margin-top:10px">Code d’activation</label>
-    <input id="proCodeInput" type="text" placeholder="Ex : AUTOPRO-2025">
+    <input id="proCodeInput" type="text" placeholder="Ex : AUTOCARE-PRO-LIFE">
 
-    <div class="note">Si tu n’as pas encore payé : clique “Passer en Pro”, paie 12€, puis reviens ici.</div>
+    <div class="note">
+      Si tu n’as pas encore payé : clique “Pro Annuel (12€)” ou “Pro À VIE (25€)”, puis reviens ici.
+    </div>
     <div class="ok" id="proOk">✅ Pro activé sur cet appareil.</div>
     <div class="err" id="proErr">❌ Code incorrect.</div>
 
@@ -331,14 +336,21 @@
   /**************
    * CONFIG
    **************/
-  const PAYPAL_ME = "https://www.paypal.com/paypalme/autocareplus811/12"; // 12€ (PayPal choisira la devise si besoin)
-  const PRO_CODE  = "AUTOPRO-2025"; // code attendu sur le site (tu peux le changer)
+  // MODIF: 2 liens PayPal (NCP)
+  const PAYPAL_YEAR = "https://www.paypal.com/ncp/payment/H7XS9WN7TWQPN"; // 12€ annuel
+  const PAYPAL_LIFE = "https://www.paypal.com/ncp/payment/46DYQBYYAGGAQ"; // 25€ à vie
+
+  // MODIF: 2 codes acceptés (+ compat avec ton ancien code si tu en as déjà distribué)
+  const PRO_CODE_YEAR = "AUTOCARE-PRO-YEAR";
+  const PRO_CODE_LIFE = "AUTOCARE-PRO-LIFE";
+  const PRO_CODE_LEGACY = "AUTOPRO-2025"; // compat (optionnel)
 
   /**************
    * STORAGE
    **************/
   const LS_KEY = "autocare_data_v2"; // bump version pour éviter conflits anciens
   const LS_PRO = "autocare_pro_v1";
+  const LS_PRO_TYPE = "autocare_pro_type"; // MODIF: year|life
 
   function loadData(){
     try{
@@ -350,7 +362,18 @@
   function saveData(data){ localStorage.setItem(LS_KEY, JSON.stringify(data)); }
 
   function isPro(){ return localStorage.getItem(LS_PRO) === "1"; }
-  function setPro(v){ localStorage.setItem(LS_PRO, v ? "1" : "0"); refreshProUI(); renderAll(); }
+
+  // MODIF: setPro accepte un type
+  function setPro(v, type){
+    localStorage.setItem(LS_PRO, v ? "1" : "0");
+    if(v && type){
+      localStorage.setItem(LS_PRO_TYPE, type);
+    }else if(!v){
+      localStorage.removeItem(LS_PRO_TYPE);
+    }
+    refreshProUI();
+    renderAll();
+  }
 
   /**************
    * UI HELPERS
@@ -360,10 +383,12 @@
   function refreshProUI(){
     const pill = $("proPill");
     const pro = isPro();
+
     if(pro){
       pill.classList.remove("off");
       pill.classList.add("on");
-      pill.textContent = "✅ Pro: ON";
+      const t = (localStorage.getItem(LS_PRO_TYPE)||"").toLowerCase();
+      pill.textContent = t === "life" ? "✅ Pro: À VIE" : (t === "year" ? "✅ Pro: ANNUEL" : "✅ Pro: ON");
     }else{
       pill.classList.remove("on");
       pill.classList.add("off");
@@ -615,9 +640,13 @@
     renderAll();
   });
 
-  // PayPal
-  $("buyProBtn").addEventListener("click", ()=>{
-    window.open(PAYPAL_ME, "_blank", "noopener,noreferrer");
+  // PayPal (MODIF: 2 boutons)
+  $("buyProYearBtn").addEventListener("click", ()=>{
+    window.open(PAYPAL_YEAR, "_blank", "noopener,noreferrer");
+    showModal(true);
+  });
+  $("buyProLifeBtn").addEventListener("click", ()=>{
+    window.open(PAYPAL_LIFE, "_blank", "noopener,noreferrer");
     showModal(true);
   });
 
@@ -629,17 +658,36 @@
   });
 
   $("confirmProBtn").addEventListener("click", ()=>{
-    const code = $("proCodeInput").value.trim();
+    const code = $("proCodeInput").value.trim().toUpperCase();
     $("proOk").classList.remove("show");
     $("proErr").classList.remove("show");
 
-    if(code && code.toUpperCase() === PRO_CODE.toUpperCase()){
-      setPro(true);
+    if(!code){
+      $("proErr").classList.add("show");
+      return;
+    }
+
+    if(code === PRO_CODE_YEAR){
+      setPro(true, "year");
       $("proOk").classList.add("show");
       setTimeout(()=>showModal(false), 650);
-    }else{
-      $("proErr").classList.add("show");
+      return;
     }
+    if(code === PRO_CODE_LIFE){
+      setPro(true, "life");
+      $("proOk").classList.add("show");
+      setTimeout(()=>showModal(false), 650);
+      return;
+    }
+    // compat ancien code
+    if(code === PRO_CODE_LEGACY.toUpperCase()){
+      setPro(true, "year");
+      $("proOk").classList.add("show");
+      setTimeout(()=>showModal(false), 650);
+      return;
+    }
+
+    $("proErr").classList.add("show");
   });
 
   // Désactiver Pro
